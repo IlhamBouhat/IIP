@@ -85,6 +85,7 @@ void draw() {
     noStroke();
     fill(255);
     text(featureText, features[i].x, features[i].y-20);
+    text(labelIndex, 0,640);
     println(features[i].x, features[i].y, features[i].width, features[i].height);
     
     if (b_saveCSV) {
@@ -128,7 +129,12 @@ void captureEvent(Capture c) {
   c.read();
 }
 
-
+void mousePressed() {
+  if (mouseButton == RIGHT) {
+    ++labelIndex;
+    labelIndex %= 10;
+  }
+}
 
 
 
@@ -142,11 +148,7 @@ void keyPressed() {
   if (key == 'C' || key == 'c') {
     csvData.clearRows();
   }
-  
-  if(key == '/' ){
-    labelIndex++;
-    labelIndex%=10;
-  }
+ 
 }
 
 String getCharFromInteger(double i) { //0 = A, 1 = B, and so forth
