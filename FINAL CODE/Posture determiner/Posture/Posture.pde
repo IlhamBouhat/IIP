@@ -94,6 +94,8 @@ void draw() {
        // newRow.setFloat("y", features[i].y);
         newRow.setFloat("box", features[i].width);
         newRow.setFloat("sensor", rawData);
+        newRow.setString("label", getCharFromInteger(labelIndex));
+        println("Label =" + labelIndex);
       }
       saveCSV(dataSetName, csvData);
       saveARFF(dataSetName, csvData);
@@ -103,7 +105,7 @@ void draw() {
   }
   popMatrix();
   
-  
+  keyPressed();
    // drawMouseCursor(labelIndex);
 }
 
@@ -142,7 +144,7 @@ void keyPressed() {
   }
   
   if(key == '/' ){
-    ++labelIndex;
+    labelIndex++;
     labelIndex%=10;
   }
 }
