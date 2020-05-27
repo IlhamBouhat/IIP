@@ -1,0 +1,7 @@
+@relation accData
+@attribute box numeric
+@attribute sensor numeric
+@data
+81.0,0.0
+109.0,0.0
+58.0,0.0

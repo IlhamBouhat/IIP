@@ -1,0 +1,6 @@
+@relation accData
+@attribute box numeric
+@data
+93.0
+59.0
+104.0
