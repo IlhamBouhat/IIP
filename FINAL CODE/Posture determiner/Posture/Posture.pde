@@ -32,14 +32,14 @@ Table csvData;
 boolean b_saveCSV = false;
 String dataSetName = "accData"; 
 String[] attrNames = new String[]{"box", "sensor"};
-boolean[] attrIsNominal = new boolean[]{false, false};
-//int labelIndex = 0;
+boolean[] attrIsNominal = new boolean[]{false, false,true};
+int labelIndex = 0;
 
 void setup() {
   size(640, 480);
   video = new Capture(this, 640/div, 480/div);
   opencv = new OpenCV(this, 640/div, 480/div);
-  opencv.loadCascade( OpenCV.CASCADE_FRONTALFACE  );
+  opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
   opencv.useColor();
   video.start();
   fill(255);
@@ -69,7 +69,7 @@ void draw() {
  
   //https://github.com/atduskgreg/opencv-processing/blob/master/src/gab/opencv/OpenCV.java
   
-      opencv.loadCascade(  OpenCV.CASCADE_FRONTALFACE  );
+      opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
       featureText = "Face";   
       opencv.loadImage(video);
       src = opencv.getSnapshot();
@@ -104,7 +104,7 @@ void draw() {
   popMatrix();
   
   
-    //drawMouseCursor(labelIndex);
+   // drawMouseCursor(labelIndex);
 }
 
 void serialEvent(Serial port){
@@ -126,6 +126,10 @@ void captureEvent(Capture c) {
   c.read();
 }
 
+
+
+
+
 void keyPressed() {
   if (key == 'S' || key == 's') {
     b_saveCSV = true;
@@ -137,7 +141,16 @@ void keyPressed() {
     csvData.clearRows();
   }
   
+  if(key == '/' ){
+    ++labelIndex;
+    labelIndex%=10;
+  }
 }
+
+String getCharFromInteger(double i) { //0 = A, 1 = B, and so forth
+  return ""+char(min((int)(i+'A'), 90));
+}
+
 void saveCSV(String dataSetName, Table csvData){
   saveTable(csvData, dataPath(dataSetName+".csv")); //save table as CSV file
   println("Saved as: ", dataSetName+".csv");
