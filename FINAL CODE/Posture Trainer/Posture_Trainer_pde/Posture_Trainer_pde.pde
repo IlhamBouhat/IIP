@@ -33,7 +33,12 @@ void setup(){
    port.bufferUntil('\n'); // arduino ends each data packet with a carriage return 
    port.clear(); 
    
-   loadTrainARFF(dataset="accData.arff"); //load a ARFF dataset
+  video = new Capture(this, 640, 480);
+  opencv = new OpenCV(this, 640, 480);
+  opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);  
+  video.start();
+  imageMode(CENTER);
+  loadTrainARFF(dataset="accData.arff"); //load a ARFF dataset
   println(train);
   trainLinearSVC(C=64);               //train a KNN classifier
   //setModelDrawing(unit=2); //set the model visualization (for 2D features)
@@ -52,9 +57,9 @@ void draw() {
  
   //https://github.com/atduskgreg/opencv-processing/blob/master/src/gab/opencv/OpenCV.java
   
-      opencv.loadCascade(  OpenCV.CASCADE_FRONTALFACE  );
       featureText = "Face";   
       opencv.loadImage(video);
+      opencv.useColor();
       src = opencv.getSnapshot();
       image(src, 0, 0);
 
@@ -68,7 +73,7 @@ void draw() {
     noStroke();
     fill(255);
     text(featureText, features[i].x, features[i].y-20);
-    println(features[i].x, features[i].y, features[i].width, features[i].height);
+    //println(features[i].x, features[i].y, features[i].width, features[i].height);
     
      if (dataUpdated) {
     background(52);
@@ -88,7 +93,7 @@ void draw() {
       default: break;
     }
     dataUpdated = false;
-    println(features[i].width, rawData, Y);
+    //println(features[i].width, rawData, Y);
   }
    
   }
@@ -100,7 +105,7 @@ void serialEvent(Serial port){
   String inData = port.readStringUntil('\n');
   if(inData.charAt(0) == 'A'){
     rawData = int(trim(inData.substring(1)));
-    println(rawData);
+    //println(rawData);
     }
     if(rawData >= 900){
       port.write('a');
@@ -109,4 +114,8 @@ void serialEvent(Serial port){
       port.write('b');
     }
   return;
+}
+
+void captureEvent(Capture c) {
+  c.read();
 }
