@@ -49,7 +49,7 @@ int labelIndex = 0;
 
 /**
  * Setup for the posture code set
- * Defines libraries used, and which features are selects
+ * Defines libraries used, and which features are selected
  * Initialises serial communication
  * creates a csv file
  **/
