@@ -38,16 +38,18 @@ void setup() {
   port.bufferUntil('\n'); // arduino ends each data packet with a carriage return 
   port.clear(); 
 
-  video = new Capture(this, 640, 480);
-  opencv = new OpenCV(this, 640, 480);
+  video = new Capture(this, 640/div, 480/div);
+  opencv = new OpenCV(this, 640/div, 480/div);
   opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);  
   video.start();
+  //imageMode(CENTER);
   loadTrainARFF(dataset="accData.arff"); //load a ARFF dataset
   loadModel(model="LinearSVC.model"); //load a pretrained model.
   evaluateTrainSet(fold = 5, isRegression = false, showEvalDetails=true);
   
-  
+  background(52);
 }
+
 void draw() {
   background(0);
   pushMatrix();
