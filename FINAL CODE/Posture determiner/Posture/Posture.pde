@@ -1,7 +1,18 @@
-//*********************************************
-// Example Code for Interactive Intelligent Products
-// Rong-Hao Liang: r.liang@tue.nl
-//*********************************************
+/**
+ * Posture determining code
+ * @author Ilham El Bouhattaoui, Luuk Stavenuiter, Nadine Schellekens
+ * @id 1225930, 
+ * date: 31/05/2020
+ * 
+ * This code uses the opencv library and the processing video library to determine the distance between the face and the webcam and 
+ * saves it to a parameter, {@ code A} being good posture and {@code B} being bad posture
+ *
+ * Uses example codes from Rong Hao's github library for the course DBB220 Interactive Intelligent Products
+ * Links to the source code: 
+ *
+ *
+ *
+ **/
 import processing.serial.*;
 Serial port;
 
@@ -9,6 +20,7 @@ Serial port;
 import gab.opencv.*;
 import processing.video.*;
 import java.awt.*;
+
 
 Capture video;
 OpenCV opencv;
@@ -32,26 +44,36 @@ Table csvData;
 boolean b_saveCSV = false;
 String dataSetName = "accData"; 
 String[] attrNames = new String[]{"box", "sensor"};
-boolean[] attrIsNominal = new boolean[]{false, false,true};
+boolean[] attrIsNominal = new boolean[]{false, false, true};
 int labelIndex = 0;
+
+/**
+ * Setup for the posture code set
+ * Defines libraries used, and which features are selects
+ * Initialises serial communication
+ * creates a csv file
+ **/
 
 void setup() {
   size(640, 480);
+
+  //initialises the video library and opencv library
   video = new Capture(this, 640/div, 480/div);
   opencv = new OpenCV(this, 640/div, 480/div);
-  opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
-  opencv.useColor();
+
+  //when the code is run, the webcam is loaded
   video.start();
   fill(255);
   textSize(12);
   textAlign(LEFT, TOP);
-  
+
+  //initialises the Serial communication. Each time Arduino sends a value, that value is loaded in a list
   for (int i = 0; i < Serial.list().length; i++) println("[", i, "]:", Serial.list()[i]);
   String portName = Serial.list()[0];
   port = new Serial(this, portName, 115200);
   port.bufferUntil('\n'); // arduino ends each data packet with a carriage return 
   port.clear();
-  
+
   //Initiate the dataList and set the header of table
   csvData = new Table();
   for (int i = 0; i < attrNames.length; i++) {
@@ -59,23 +81,33 @@ void setup() {
     if (attrIsNominal[i]) csvData.setColumnType(i, Table.STRING);
     else csvData.setColumnType(i, Table.FLOAT);
   }
-    
 }
 
+
+/**
+ * draw method 
+ * In this method, the opencv library is initialised
+ * Furthermore, it is calibrated to detect the face and draw a bounding box around it
+ * The bounding box is determined with the x, y, width and height of the face to the webcam
+ * It also saves the width variable to determine the distance. The larger the bounding box, the closer 
+ * the user is to the webcam and vice versa
+ * These variables are then saved to a parameter {@ code A} or {@ code B}, being good and bad posture
+ **/
 void draw() {
   background(0);
   pushMatrix();
   scale(2);
- 
-  //https://github.com/atduskgreg/opencv-processing/blob/master/src/gab/opencv/OpenCV.java
-  
-      opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
-      featureText = "Face";   
-      opencv.loadImage(video);
-      src = opencv.getSnapshot();
-      image(src, 0, 0);
 
-      Rectangle[] features = opencv.detect();
+  //https://github.com/atduskgreg/opencv-processing/blob/master/src/gab/opencv/OpenCV.java
+
+  opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
+  opencv.useColor();
+  featureText = "Face";   
+  opencv.loadImage(video);
+  src = opencv.getSnapshot();
+  image(src, 0, 0);
+
+  Rectangle[] features = opencv.detect();
 
   // draw detected face area(s)
   for ( int i=0; i<features.length; i++ ) {
@@ -85,14 +117,12 @@ void draw() {
     noStroke();
     fill(255);
     text(featureText, features[i].x, features[i].y-20);
-    text(labelIndex, 0,640);
+    text(labelIndex, 0, 640);
     println(features[i].x, features[i].y, features[i].width, features[i].height);
-    
+
     if (b_saveCSV) {
       for (int n = 0; n < dataNum; n ++) {
         TableRow newRow = csvData.addRow();
-       // newRow.setFloat("x", features[i].x);
-       // newRow.setFloat("y", features[i].y);
         newRow.setFloat("box", features[i].width);
         newRow.setFloat("sensor", rawData);
         newRow.setString("label", getCharFromInteger(labelIndex));
@@ -100,28 +130,31 @@ void draw() {
       }
       saveCSV(dataSetName, csvData);
       saveARFF(dataSetName, csvData);
-      
+
       b_saveCSV = false;
     }
   }
   popMatrix();
-  
+
   keyPressed();
-   // drawMouseCursor(labelIndex);
 }
 
-void serialEvent(Serial port){
+/**
+ * Writes back from Processing to Arduino to give a signal that the number has been received and to signal that someone
+ * is in bad posture using an LED light
+ **/
+
+void serialEvent(Serial port) {
   String inData = port.readStringUntil('\n');
-  if(inData.charAt(0) == 'A'){
+  if (inData.charAt(0) == 'A') {
     rawData = int(trim(inData.substring(1)));
     println(rawData);
-    }
-    if(rawData >= 900){
-      port.write('a');
-    }
-    else{
-      port.write('b');
-    }
+  }
+  if (rawData >= 900) {
+    port.write('a');
+  } else {
+    port.write('b');
+  }
   return;
 }
 
@@ -129,6 +162,9 @@ void captureEvent(Capture c) {
   c.read();
 }
 
+/**
+ * On the right mouseclick, one changes the label index from A to B
+ **/
 void mousePressed() {
   if (mouseButton == RIGHT) {
     ++labelIndex;
@@ -139,23 +175,22 @@ void mousePressed() {
 
 
 void keyPressed() {
-  if (key == 'S' || key == 's') {
+  if (key == 'S' || key == 's') { //saves to CSV
     b_saveCSV = true;
   }
-  if (key == ' ') {
+  if (key == ' ') { //cleans the data index
     dataIndex = 0;
   }
-  if (key == 'C' || key == 'c') {
+  if (key == 'C' || key == 'c') { //starts the measuring over
     csvData.clearRows();
   }
- 
 }
 
 String getCharFromInteger(double i) { //0 = A, 1 = B, and so forth
   return ""+char(min((int)(i+'A'), 90));
 }
 
-void saveCSV(String dataSetName, Table csvData){
+void saveCSV(String dataSetName, Table csvData) {
   saveTable(csvData, dataPath(dataSetName+".csv")); //save table as CSV file
   println("Saved as: ", dataSetName+".csv");
 }
