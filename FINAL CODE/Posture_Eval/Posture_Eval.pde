@@ -75,18 +75,18 @@ void draw() {
     text(featureText, features[i].x, features[i].y-20);
     //println(features[i].x, features[i].y, features[i].width, features[i].height);
 
-    if (dataUpdated) {
-      background(52);
-      fill(255);
+   // if (dataUpdated) {
+   //   background(52);
+   //   fill(255);
       float[] X = {features[i].width, rawData}; 
       String Y = getPrediction(X);
-      textSize(32);
+      textSize(12);
       textAlign(CENTER, CENTER);
       String text = "Prediction: "+Y+
         "\n X="+features[i].width+
         "\n Y="+rawData;
 
-      text(text, width/2, height/2);
+      text(text, 40, 50);
       switch(Y) {
       case "A": 
         port.write('a'); 
@@ -97,9 +97,9 @@ void draw() {
       default: 
         break;
       }
-      dataUpdated = false;
-      //println(features[i].width, rawData, Y);
-    }
+     // dataUpdated = false;
+      println(features[i].width, rawData, Y);
+   // }
   }
   popMatrix();
   //drawMouseCursor(labelIndex);
