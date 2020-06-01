@@ -7,8 +7,10 @@
  * This code uses the opencv library and the processing video library to determine the distance between the face and the webcam and 
  * saves it to a parameter, {@ code A} being good posture and {@code B} being bad posture
  *
- * Uses example codes from Rong Hao's github library for the course DBB220 Interactive Intelligent Products
+ * Uses example codes from the github library for the course DBB220 Interactive Intelligent Products
  * Links to the source code: 
+ * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/2_2_Serial_Communication/Processing/p2_2c_SaveSerialAsARFF_A012
+ * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/HAARCascade
  *
  *
  *

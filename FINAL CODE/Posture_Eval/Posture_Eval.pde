@@ -7,12 +7,14 @@
  * The baseline for this code is the same as the Posture_Trainer code
  * One change is that it loads the model made in the Trainer code, and the data set, and will then do a live prediction under which label each scenario falls
  
- * Uses example codes from Rong Hao's github library for the course DBB220 Interactive Intelligent Products topic 3.1 and 8.2
+ * Uses example codes from the github library for the course DBB220 Interactive Intelligent Products topic 2.2, 3.1 and 8.2
  
  * Links to the source code: 
- *
- *
- *
+ * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/2_2_Serial_Communication/Processing/p2_2c_SaveSerialAsARFF_A012
+ * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/3_1_Linear_Support_Vector_Classification/Processing/p3_1b_loadLSVC
+ * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/HAARCascade
+ * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/SaveARFF_FaceRecognition
+ * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/TrainLSVC_FaceRecognition
  **/
 
 import processing.serial.*;
@@ -50,7 +52,7 @@ int dataIndex = 0;
  **/
 void setup() {
   size(640, 480);
-  
+
 
   //initialises the video library and opencv library
   video = new Capture(this, 640/div, 480/div);
@@ -61,14 +63,14 @@ void setup() {
   loadTrainARFF(dataset="accData.arff"); //load a ARFF dataset
   loadModel(model="LinearSVC.model"); //load a pretrained model.
   evaluateTrainSet(fold = 5, isRegression = false, showEvalDetails=true); 
-  
+
   //initialises the Serial communication. Each time Arduino sends a value, that value is loaded in a list
   for (int i = 0; i < Serial.list().length; i++) println("[", i, "]:", Serial.list()[i]);
   String portName = Serial.list()[Serial.list().length-1];
   port = new Serial(this, portName, 115200);
   port.bufferUntil('\n'); // arduino ends each data packet with a carriage return 
   port.clear(); 
-  
+
   background(52);
 }
 

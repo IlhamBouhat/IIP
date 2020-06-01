@@ -8,9 +8,12 @@
  * It will load the dataset made in the posture set
  * It will then train a model with that set and save it
  * It also shows the predictions in real time
- * Uses example codes from Rong Hao Liang's github library for the course DBB220 Interactive Intelligent Products topic 2.1, 3.1 and 8.2
- 
+ * Uses example codes from Rong Hao Liang's github library for the course DBB220 Interactive Intelligent Products topic 2.2and 8.2
  * Links to the source code: 
+ * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/2_2_Serial_Communication/Processing/p2_2c_SaveSerialAsARFF_A012
+ * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/HAARCascade
+ * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/SaveARFF_FaceRecognition
+ * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/TrainLSVC_FaceRecognition
  *
  *
  *
