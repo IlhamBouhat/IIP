@@ -46,7 +46,7 @@ Table csvData;
 boolean b_saveCSV = false;
 String dataSetName = "accData"; 
 String[] attrNames = new String[]{"box", "sensor"};
-boolean[] attrIsNominal = new boolean[]{false, false, true};
+boolean[] attrIsNominal = new boolean[]{false, false, false};
 int labelIndex = 0;
 
 /**

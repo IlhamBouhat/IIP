@@ -1,8 +1,3 @@
-//*********************************************
-// Weka for Processing v7
-// Rong-Hao Liang: r.liang@tue.nl
-//*********************************************
-
 import weka.core.converters.ConverterUtils.DataSource; //https://weka.sourceforge.io/doc.stable-3-8/weka/core/converters/ConverterUtils.DataSource.html
 import weka.core.Attribute; //https://weka.sourceforge.io/doc.dev/weka/core/Attribute.html
 import weka.core.Instances; //https://weka.sourceforge.io/doc.dev/weka/core/Instances.html
@@ -16,6 +11,9 @@ import java.util.Random; //https://docs.oracle.com/javase/8/docs/api/java/util/R
 import weka.classifiers.functions.SMO; //https://weka.sourceforge.io/doc.stable/weka/classifiers/functions/SMO.htm
 import weka.classifiers.functions.supportVector.RBFKernel; //https://weka.sourceforge.io/doc.dev/weka/classifiers/functions/supportVector/RBFKernel.html
 import weka.classifiers.functions.supportVector.PolyKernel; //https://weka.sourceforge.io/doc.dev/weka/classifiers/functions/supportVector/PolyKernel.html
+import weka.classifiers.functions.LinearRegression; //https://weka.sourceforge.io/doc.dev/weka/classifiers/functions/LinearRegression.html
+import weka.classifiers.evaluation.RegressionAnalysis; //https://weka.sourceforge.io/doc.dev/weka/classifiers/evaluation/RegressionAnalysis.html
+import weka.classifiers.functions.supportVector.RegSMOImproved; //https://weka.sourceforge.io/doc.dev/weka/classifiers/functions/supportVector/RegSMOImproved.html
 
 DataSource source;
 Instances train;
@@ -46,10 +44,21 @@ double weightedMccTest, weightedRocTest, weightedPrcTest;
 double[] precisionTest, recallTest, tprTest, fprTest, fnrTest, fTest, mccTest, rocTest, prcTest;
 double[][] confusionMatrixTest;
 
+double slope = 0;
+double intercept = 0;
+double corrCoef = 0;
+double mae = 0;
+double rmse = 0;
+double rae = 0;
+double rrse = 0;
+double ssr = 0;
+double rSquared = 0;
+
 String dataset = "";
 String model = "";
 double C = 64;
 double gamma = 64;
+double epsilon = 64;
 int K = 1;
 int fold = 5;
 int unit = 2;
@@ -60,11 +69,12 @@ PImage[][] modelImageGrid;// = new double[numOfC][numOfGamma];
 double[][] accuracyGrid;// = new double[numOfC][numOfGamma];
 //double[][] timeLapseGrid;// = new double[numOfC][numOfGamma];
 boolean showEvalDetails = true;
+boolean isRegression = false;
 
 double[] CList;
 double[] gammaList;
-
-
+double[] EpsList;
+int[] KList;
 
 color colors[] = {
   color(155, 89, 182), color(63, 195, 128), color(214, 69, 65), 
@@ -161,7 +171,7 @@ void loadCSVNumeric(String _filename) {
   }
 }
 
-void saveSVC(String _filename) {
+void saveModel(String _filename) {
   saveClassifier(cls, _filename);
 }
 
@@ -238,105 +248,170 @@ String getPrediction(float[] _features) {
   return label;
 }
 
-void loadLinearSVC(String fileName) {
+void loadModel(String fileName) {
   try {
-    cls = (SMO) weka.core.SerializationHelper.read(dataPath(fileName));
+    cls = (Classifier) weka.core.SerializationHelper.read(dataPath(fileName));
   } 
   catch (Exception e) {
     e.printStackTrace();
   }
 }
 
-void evaluateTestSet(boolean _showEvalDetails) {
+void evaluateTestSet(boolean _isRegression, boolean _showEvalDetails) {
   showEvalDetails = _showEvalDetails;
   try {
     eval = new Evaluation(test);
     eval.evaluateModel(cls, test);
-    if (showEvalDetails) {
-      System.out.println(eval.toSummaryString("\nResults\n======\n", false));
-      System.out.println(eval.toMatrixString());
-      System.out.println(eval.toClassDetailsString());
-    }
-    accuracyTest = eval.pctCorrect();
-    weightedPrecisionTest = eval.weightedPrecision();
-    weightedRecallTest = eval.weightedRecall();
-    weightedFprTest = eval.weightedFalsePositiveRate();
-    weightedFnrTest = eval.weightedFalseNegativeRate();
-    weightedFTest = eval.weightedFMeasure();
-    weightedMccTest = eval. weightedMatthewsCorrelation();
-    weightedRocTest = eval.weightedAreaUnderROC();
-    weightedPrcTest = eval.weightedAreaUnderPRC();
+    if (_isRegression) {
+      corrCoef = eval.correlationCoefficient();
+      mae = eval.meanAbsoluteError();
+      rmse = eval.rootMeanSquaredError();
+      rae = eval.relativeAbsoluteError();
+      rrse = eval.rootRelativeSquaredError();
+      
+      LinearRegression lReg= new LinearRegression();
+      lReg.buildClassifier(train);
+      slope = lReg.coefficients()[0];
+      intercept = lReg.coefficients()[lReg.coefficients().length-1];
+      ssr = RegressionAnalysis.calculateSSR(train, attributesTrain.get(0), slope, intercept);
+      rSquared = RegressionAnalysis.calculateRSquared(train, ssr);
+      if (showEvalDetails) {
+        println(eval.toSummaryString("\nResults\n======\n", false));
+        println(lReg);
+        for (int n=0; n<train.numAttributes()-1; n++) {
+          println("slope ("+train.attribute(n).name()+"):", lReg.coefficients()[n]);
+        }
+        println("intercept:", lReg.coefficients()[lReg.coefficients().length-1]);
+        println("ssr:", ssr);
+        println("r-Square:", rSquared);
+      }
+    } else if (!_isRegression) {
+      if (showEvalDetails) {
+        System.out.println(eval.toSummaryString("\nResults\n======\n", false));
+        System.out.println(eval.toMatrixString());
+        System.out.println(eval.toClassDetailsString());
+      }
+      accuracyTest = eval.pctCorrect();
+      weightedPrecisionTest = eval.weightedPrecision();
+      weightedRecallTest = eval.weightedRecall();
+      weightedFprTest = eval.weightedFalsePositiveRate();
+      weightedFnrTest = eval.weightedFalseNegativeRate();
+      weightedFTest = eval.weightedFMeasure();
+      weightedMccTest = eval. weightedMatthewsCorrelation();
+      weightedRocTest = eval.weightedAreaUnderROC();
+      weightedPrcTest = eval.weightedAreaUnderPRC();
 
-    confusionMatrixTest = eval.confusionMatrix();
+      confusionMatrixTest = eval.confusionMatrix();
 
-    precisionTest = new double[nClassesTest];
-    recallTest = new double[nClassesTest];
-    tprTest = new double[nClassesTest];
-    fprTest = new double[nClassesTest];
-    fnrTest = new double[nClassesTest];
-    fTest = new double[nClassesTest];
-    rocTest = new double[nClassesTest];
-    prcTest = new double[nClassesTest];
-    mccTest = new double[nClassesTest];
-    for (int i = 0; i < nClassesTest; i++) {
-      precisionTest[i] = eval.precision(i);
-      recallTest[i] = eval.recall(i);
-      fnrTest[i] = eval.falseNegativeRate(i);
-      fprTest[i] = eval.falsePositiveRate(i);
-      tprTest[i] = eval.truePositiveRate(i);
-      fTest[i] = eval.fMeasure(i);
-      rocTest[i] = eval.areaUnderROC(i);
-      prcTest[i] = eval.areaUnderPRC(i);
-      mccTest[i] = eval.matthewsCorrelationCoefficient(i);
+      precisionTest = new double[nClassesTest];
+      recallTest = new double[nClassesTest];
+      tprTest = new double[nClassesTest];
+      fprTest = new double[nClassesTest];
+      fnrTest = new double[nClassesTest];
+      fTest = new double[nClassesTest];
+      rocTest = new double[nClassesTest];
+      prcTest = new double[nClassesTest];
+      mccTest = new double[nClassesTest];
+      for (int i = 0; i < nClassesTest; i++) {
+        precisionTest[i] = eval.precision(i);
+        recallTest[i] = eval.recall(i);
+        fnrTest[i] = eval.falseNegativeRate(i);
+        fprTest[i] = eval.falsePositiveRate(i);
+        tprTest[i] = eval.truePositiveRate(i);
+        fTest[i] = eval.fMeasure(i);
+        rocTest[i] = eval.areaUnderROC(i);
+        prcTest[i] = eval.areaUnderPRC(i);
+        mccTest[i] = eval.matthewsCorrelationCoefficient(i);
+      }
     }
-  }catch(java.lang.Exception e) {
+  }
+  catch(java.lang.Exception e) {
     println(e);
   }
 }
 
-void evaluateTrainSet(int _fold, boolean _showEvalDetails) {
+void evaluateTrainSet(int _fold, boolean _isRegression, boolean _showEvalDetails) {
   showEvalDetails = _showEvalDetails;
   try {
     eval = new Evaluation(train);
     eval.crossValidateModel(cls, train, _fold, new Random(1)); //10-fold cross validation
-    if (showEvalDetails) {
-      System.out.println(eval.toSummaryString("\nResults\n======\n", false));
-      System.out.println(eval.toMatrixString());
-      System.out.println(eval.toClassDetailsString());
-    }
-    accuracyTrain = eval.pctCorrect();
-    weightedPrecisionTrain = eval.weightedPrecision();
-    weightedRecallTrain = eval.weightedRecall();
-    weightedFprTrain = eval.weightedFalsePositiveRate();
-    weightedFnrTrain = eval.weightedFalseNegativeRate();
-    weightedFTrain = eval.weightedFMeasure();
-    weightedMccTrain = eval. weightedMatthewsCorrelation();
-    weightedRocTrain = eval.weightedAreaUnderROC();
-    weightedPrcTrain = eval.weightedAreaUnderPRC();
+    if (_isRegression) {
+      corrCoef = eval.correlationCoefficient();
+      mae = eval.meanAbsoluteError();
+      rmse = eval.rootMeanSquaredError();
+      rae = eval.relativeAbsoluteError();
+      rrse = eval.rootRelativeSquaredError();
 
-    confusionMatrixTrain = eval.confusionMatrix();
+      LinearRegression lReg= new LinearRegression();
+      lReg.buildClassifier(train);
+      slope = lReg.coefficients()[0];
+      intercept = lReg.coefficients()[lReg.coefficients().length-1];
+      ssr = RegressionAnalysis.calculateSSR(train, attributesTrain.get(0), slope, intercept);
+      rSquared = RegressionAnalysis.calculateRSquared(train, ssr);
+      if (showEvalDetails) {
+        println(eval.toSummaryString("\nResults\n======\n", false));
+        println(lReg);
+        for (int n=0; n<train.numAttributes()-1; n++) {
+          println("slope ("+train.attribute(n).name()+"):", lReg.coefficients()[n]);
+        }
+        println("intercept:", lReg.coefficients()[lReg.coefficients().length-1]);
+        println("ssr:", ssr);
+        println("r-Square:", rSquared);
+      }
+    } else if (!_isRegression) {
+      if (showEvalDetails) {
+        System.out.println(eval.toSummaryString("\nResults\n======\n", false));
+        System.out.println(eval.toMatrixString());
+        System.out.println(eval.toClassDetailsString());
+      }
+      accuracyTrain = eval.pctCorrect();
+      weightedPrecisionTrain = eval.weightedPrecision();
+      weightedRecallTrain = eval.weightedRecall();
+      weightedFprTrain = eval.weightedFalsePositiveRate();
+      weightedFnrTrain = eval.weightedFalseNegativeRate();
+      weightedFTrain = eval.weightedFMeasure();
+      weightedMccTrain = eval. weightedMatthewsCorrelation();
+      weightedRocTrain = eval.weightedAreaUnderROC();
+      weightedPrcTrain = eval.weightedAreaUnderPRC();
 
-    precisionTrain = new double[nClassesTrain];
-    recallTrain = new double[nClassesTrain];
-    tprTrain = new double[nClassesTrain];
-    fprTrain = new double[nClassesTrain];
-    fnrTrain = new double[nClassesTrain];
-    fTrain = new double[nClassesTrain];
-    rocTrain = new double[nClassesTrain];
-    prcTrain = new double[nClassesTrain];
-    mccTrain = new double[nClassesTrain];
-    for (int i = 0; i < nClassesTrain; i++) {
-      precisionTrain[i] = eval.precision(i);
-      recallTrain[i] = eval.recall(i);
-      fnrTrain[i] = eval.falseNegativeRate(i);
-      fprTrain[i] = eval.falsePositiveRate(i);
-      tprTrain[i] = eval.truePositiveRate(i);
-      fTrain[i] = eval.fMeasure(i);
-      rocTrain[i] = eval.areaUnderROC(i);
-      prcTrain[i] = eval.areaUnderPRC(i);
-      mccTrain[i] = eval.matthewsCorrelationCoefficient(i);
+      confusionMatrixTrain = eval.confusionMatrix();
+
+      precisionTrain = new double[nClassesTrain];
+      recallTrain = new double[nClassesTrain];
+      tprTrain = new double[nClassesTrain];
+      fprTrain = new double[nClassesTrain];
+      fnrTrain = new double[nClassesTrain];
+      fTrain = new double[nClassesTrain];
+      rocTrain = new double[nClassesTrain];
+      prcTrain = new double[nClassesTrain];
+      mccTrain = new double[nClassesTrain];
+      for (int i = 0; i < nClassesTrain; i++) {
+        precisionTrain[i] = eval.precision(i);
+        recallTrain[i] = eval.recall(i);
+        fnrTrain[i] = eval.falseNegativeRate(i);
+        fprTrain[i] = eval.falsePositiveRate(i);
+        tprTrain[i] = eval.truePositiveRate(i);
+        fTrain[i] = eval.fMeasure(i);
+        rocTrain[i] = eval.areaUnderROC(i);
+        prcTrain[i] = eval.areaUnderPRC(i);
+        mccTrain[i] = eval.matthewsCorrelationCoefficient(i);
+      }
     }
-  }catch(java.lang.Exception e) {
+  }
+  catch(java.lang.Exception e) {
+    println(e);
+  }
+}
+
+void trainLinearRegression() {
+  try {
+    cls = new LinearRegression();
+    println("\n=== Training: Linear Regression");
+    timeStamp = millis();
+    cls.buildClassifier(train);
+    timeLapse = millis()-timeStamp;
+  }
+  catch(java.lang.Exception e) {
     println(e);
   }
 }
@@ -347,6 +422,95 @@ void trainKNN(int K) {
     cls = new IBk(K); //IBk(int k): kNN classifier.
     println("\n=== Training: KNN ( K =", K, ")");
     timeStamp = millis();
+    cls.buildClassifier(train);
+    timeLapse = millis()-timeStamp;
+  }
+  catch(java.lang.Exception e) {
+    println(e);
+  }
+}
+
+void KSearch(int[] _KList) {
+  KList = _KList;
+  accuracyGrid = new double[_KList.length][1];
+  modelImageGrid = new PImage[_KList.length][1];
+  for (int c = 0; c < _KList.length; c++) {
+    trainKNN(K=_KList[c]);
+    evaluateTrainSet(fold=5, isRegression=false, showEvalDetails=false);        //5-fold cross validation
+    setModelDrawing(unit=ceil(sqrt(_KList.length))*2);         //set the model visualization (for 2D features)
+    modelImageGrid[c][0] = pg.get();
+    accuracyGrid[c][0] = accuracyTrain;
+    println(fold+"-fold CV Accuracy:", nf((float)accuracyTrain, 0, 2), "%\n");
+  }
+}
+
+void drawKSearchModels(float x, float y, float w, float h) {
+  pushMatrix();
+  pushStyle();
+  translate(x, y);
+  float N = ceil(sqrt((float)KList.length));
+  float W = w/N;
+  for (int c = 0; c < KList.length; c++) {
+    float X = c%N*W;
+    float Y = floor(c/N)*W;
+    PImage p = modelImageGrid[c][0];
+    p.resize((int)W, (int)W);
+    image(p, X, Y);
+  }
+  popStyle();
+  popMatrix();
+}
+
+void drawKSearchResults(float x, float y, float w, float h) {
+  pushMatrix();
+  pushStyle();
+  translate(x, y);
+  textSize(32);
+  float N = ceil(sqrt((float)KList.length));
+  float W = w/N;
+  for (int c = 0; c < KList.length; c++) {
+    float X = c%N*W;
+    float Y = floor(c/N)*W;
+    String s = "K="+KList[c]+"\n"+nf((float)accuracyGrid[c][0], 0, 2)+"%";
+    fill(255);
+    text(s, X+10, Y+32);
+  }
+  popStyle();
+  popMatrix();
+}
+
+void trainLinearSVR(double epsilon) {
+  RegSMOImproved rsi;
+  try {
+    cls = new SMOreg();
+    rsi = new RegSMOImproved();
+    rsi.setTolerance(epsilon);
+    ((SMOreg)cls).setC(C);
+    ((SMOreg)cls).setRegOptimizer(rsi);
+    timeStamp = millis();
+    println("\n=== Training: Linear SVR ( C =", C, ", epsilon =", epsilon, ")");
+    cls.buildClassifier(train);
+    timeLapse = millis()-timeStamp;
+  }
+  catch(java.lang.Exception e) {
+    println(e);
+  }
+}
+
+void trainRBFSVR(double epsilon, double gamma) {
+  RBFKernel rbf;
+  RegSMOImproved rsi;
+  try {
+    cls = new SMOreg();
+    rbf = new RBFKernel();
+    rbf.setGamma(gamma);
+    rsi = new RegSMOImproved();
+    rsi.setTolerance(epsilon);
+    ((SMOreg)cls).setC(C);
+    ((SMOreg)cls).setKernel(rbf);
+    ((SMOreg)cls).setRegOptimizer(rsi);
+    timeStamp = millis();
+    println("\n=== Training: RBF SVR ( C =", C, ", gamma =", gamma, ", epsilon =", epsilon, ")");
     cls.buildClassifier(train);
     timeLapse = millis()-timeStamp;
   }
@@ -466,7 +630,7 @@ void printEvalResults(Instances ins, Classifier cls, int n_fold) {
 }
 
 void setModelDrawing(int pixelSize) {
-  if (nAttributesTrain == 3) pg = getModelImage(pg, (Classifier)cls, train, pixelSize, pixelSize); 
+  if (nAttributesTrain == 3) pg = getModelImage(pg, cls, train, pixelSize, pixelSize); 
   else pg = createGraphics(width, height); // cannot show the KNN model image for now
 }
 
@@ -475,6 +639,30 @@ void drawModel(int x, int y) {
   translate(x, y);
   if (pg!=null) image(pg, 0, 0);
   popMatrix();
+}
+
+void drawPrediction(float[] X, double Y) {
+  pushStyle();
+  textSize(12);
+  textAlign(LEFT, CENTER);
+  noStroke();
+  fill(255);
+  ellipse(X[0], X[1], 15, 15);
+
+  noStroke();
+  if (Y >= 0) {
+    color c = lerpColor(colors[floor((float)Y)%colors.length], colors[ceil((float)Y)%colors.length], (float)Y-floor((float)Y));
+    fill(c);
+  }
+  if (Y < 0) {
+    color c = lerpColor(colors[(floor((float)Y)%colors.length+colors.length)%colors.length], colors[(ceil((float)Y)%colors.length+colors.length)%colors.length], (float)Y-floor((float)Y));
+    fill(c);
+  }
+  ellipse(X[0], X[1], 10, 10);
+  fill(0);
+  String label = "X = ["+X[0]+","+X[1]+"]\nY = "+nf((float)Y, 0, 3);
+  text(label, X[0]+10, X[1]);
+  popStyle();
 }
 
 void drawPrediction(float[] X, String Y) {
@@ -492,6 +680,43 @@ void drawPrediction(float[] X, String Y) {
   popStyle();
 }
 
+void drawDataPoints(Instances db) {
+  pushStyle();
+  textSize(12);
+  textAlign(CENTER, CENTER);
+
+  for (int i = 0; i < db.numInstances(); i ++) {
+    Instance ins = db.instance(i);
+    float[] X = new float[ins.numAttributes()-1]; 
+    for (int j = 0; j < X.length; j++) {
+      X[j] = (float)ins.value(j);
+    }
+
+    pushStyle();
+    stroke(255);
+    double Y = ins.value(ins.numAttributes()-1);
+    if (Y >= 0) {
+      color c = lerpColor(colors[floor((float)Y)%colors.length], colors[ceil((float)Y)%colors.length], (float)Y-floor((float)Y));
+      fill(c);
+    }
+    if (Y < 0) {
+      color c = lerpColor(colors[(floor((float)Y)%colors.length+colors.length)%colors.length], colors[(ceil((float)Y)%colors.length+colors.length)%colors.length], (float)Y-floor((float)Y));
+      fill(c);
+    }
+
+    ellipse(X[0], X[1], 10, 10);
+    fill(255);
+    if (attributesTrain.get(ins.numAttributes()-1).type() == 0) {
+      String strY = ""+ins.value(ins.numAttributes()-1);
+      text(strY.charAt(0), X[0], X[1]);
+    } else {
+      String strY = ins.stringValue(ins.numAttributes()-1);
+      text(strY.charAt(0), X[0], X[1]);
+    }
+    popStyle();
+  }
+}
+
 void drawDataPoints() {
   pushStyle();
   textSize(12);
@@ -503,15 +728,27 @@ void drawDataPoints() {
     for (int j = 0; j < X.length; j++) {
       X[j] = (float)ins.value(j);
     }
-    String Y = ins.stringValue(ins.numAttributes()-1);
+
     pushStyle();
-    noStroke();
-    fill(255);
-    ellipse(X[0], X[1], 12, 12);
-    fill(colors[train.classAttribute().indexOfValue(Y)]);
+    stroke(255);
+    double Y = ins.value(ins.numAttributes()-1);
+    if (Y >= 0) {
+      color c = lerpColor(colors[floor((float)Y)%colors.length], colors[ceil((float)Y)%colors.length], (float)Y-floor((float)Y));
+      fill(c);
+    }
+    if (Y < 0) {
+      color c = lerpColor(colors[(floor((float)Y)%colors.length+colors.length)%colors.length], colors[(ceil((float)Y)%colors.length+colors.length)%colors.length], (float)Y-floor((float)Y));
+      fill(c);
+    }
     ellipse(X[0], X[1], 10, 10);
     fill(255);
-    text(Y.charAt(0), X[0], X[1]);
+    if (attributesTrain.get(ins.numAttributes()-1).type() == 0) {
+      String strY = ""+ins.value(ins.numAttributes()-1);
+      text(strY.charAt(0), X[0], X[1]);
+    } else {
+      String strY = ins.stringValue(ins.numAttributes()-1);
+      text(strY.charAt(0), X[0], X[1]);
+    }
     popStyle();
   }
 }
@@ -543,10 +780,13 @@ PGraphics getModelImage(PGraphics pg, Classifier cls, Instances training, int w,
         e.printStackTrace();
       }
       pg.noStroke();
-      if (classification>=0) {
-        pg.fill(colors[(int)classification]);
-      } else {
-        pg.fill(255);
+      if (classification >= 0) {
+        color c = lerpColor(colors[floor(classification)%colors.length], colors[ceil(classification)%colors.length], classification-floor((float)classification));
+        pg.fill(c);
+      }
+      if (classification < 0) {
+        color c = lerpColor(colors[(floor(classification)%colors.length+colors.length)%colors.length], colors[(ceil(classification)%colors.length+colors.length)%colors.length], classification-floor((float)classification));
+        pg.fill(c);
       }
       pg.rect(x, y, w, h);
     }
@@ -555,16 +795,30 @@ PGraphics getModelImage(PGraphics pg, Classifier cls, Instances training, int w,
   return pg;
 }
 
-void CSearchLinear(double[] _CList) {
+void CSearchLSVC(double[] _CList) {
   CList = _CList;
   accuracyGrid = new double[_CList.length][1];
   modelImageGrid = new PImage[_CList.length][1];
   for (int c = 0; c < _CList.length; c++) {
     trainLinearSVC(C=_CList[c]);
-    evaluateTrainSet(fold=5, showEvalDetails=false);        //5-fold cross validation
+    evaluateTrainSet(fold=5, isRegression=false, showEvalDetails=false);        //5-fold cross validation
     setModelDrawing(unit=ceil(sqrt(_CList.length))*2);         //set the model visualization (for 2D features)
     modelImageGrid[c][0] = pg.get();
     accuracyGrid[c][0] = accuracyTrain;
+    println(fold+"-fold CV Accuracy:", nf((float)accuracyTrain, 0, 2), "%\n");
+  }
+}
+
+void EpsSearchLSVR(double[] _EpsList) {
+  EpsList = _EpsList;
+  accuracyGrid = new double[_EpsList.length][1];
+  modelImageGrid = new PImage[_EpsList.length][1];
+  for (int c = 0; c < _EpsList.length; c++) {
+    trainLinearSVR(epsilon=_EpsList[c]);
+    evaluateTrainSet(fold=5, isRegression=true, showEvalDetails=false);        //5-fold cross validation
+    setModelDrawing(unit=ceil(sqrt(_EpsList.length))*2);         //set the model visualization (for 2D features)
+    modelImageGrid[c][0] = pg.get();
+    accuracyGrid[c][0] = rmse;
     println(fold+"-fold CV Accuracy:", nf((float)accuracyTrain, 0, 2), "%\n");
   }
 }
@@ -590,21 +844,73 @@ void drawCSearchResults(float x, float y, float w, float h) {
   pushMatrix();
   pushStyle();
   translate(x, y);
+  textSize(32);
   float N = ceil(sqrt((float)CList.length));
   float W = w/N;
   for (int c = 0; c < CList.length; c++) {
     float X = c%N*W;
     float Y = floor(c/N)*W;
-    String s = "C="+CList[c]+"\nAccuracy="+nf((float)accuracyGrid[c][0], 0, 2)+"%";
+    String s = "C="+CList[c]+"\n"+nf((float)accuracyGrid[c][0], 0, 2)+"%";
     fill(255);
-    text(s, X+10, Y+10);
+    text(s, X+10, Y+32);
   }
   popStyle();
   popMatrix();
 }
 
+void drawEpsSearchModels(float x, float y, float w, float h) {
+  pushMatrix();
+  pushStyle();
+  translate(x, y);
+  float N = ceil(sqrt((float)EpsList.length));
+  float W = w/N;
+  for (int c = 0; c < EpsList.length; c++) {
+    float X = c%N*W;
+    float Y = floor(c/N)*W;
+    PImage p = modelImageGrid[c][0];
+    p.resize((int)W, (int)W);
+    image(p, X, Y);
+  }
+  popStyle();
+  popMatrix();
+}
 
-void gridSearchRBF(double[] _CList, double[] _gammaList) {
+void drawEpsSearchResults(float x, float y, float w, float h) {
+  pushMatrix();
+  pushStyle();
+  translate(x, y);
+  textSize(32);
+  float N = ceil(sqrt((float)EpsList.length));
+  float W = w/N;
+  for (int c = 0; c < EpsList.length; c++) {
+    float X = c%N*W;
+    float Y = floor(c/N)*W;
+    String s = "e="+nf((float)EpsList[c],0,4)+"\n"+nf((float)accuracyGrid[c][0], 0, 2);
+    fill(255);
+    text(s, X+10, Y+32);
+  }
+  popStyle();
+  popMatrix();
+}
+
+void gridSearchSVR_RBF(double[] _EpsList, double[] _gammaList) {
+  EpsList = _EpsList;
+  gammaList = _gammaList;
+  accuracyGrid = new double[_EpsList.length][_gammaList.length];
+  modelImageGrid = new PImage[_EpsList.length][_gammaList.length];
+  for (int g = 0; g < _gammaList.length; g++) {
+    for (int c = 0; c < _EpsList.length; c++) {
+      trainRBFSVR(epsilon=_EpsList[c], gamma=_gammaList[g]);
+      evaluateTrainSet(fold=5, isRegression=true, showEvalDetails=false);        //5-fold cross validation
+      setModelDrawing(unit=_gammaList.length*2);         //set the model visualization (for 2D features)
+      modelImageGrid[c][g] = pg.get();
+      accuracyGrid[c][g] = rmse;
+      println(fold+"-fold CV Accuracy:", nf((float)accuracyTrain, 0, 2), "%\n");
+    }
+  }
+}
+
+void gridSearchSVC_RBF(double[] _CList, double[] _gammaList) {
   CList = _CList;
   gammaList = _gammaList;
   accuracyGrid = new double[_CList.length][_gammaList.length];
@@ -612,7 +918,7 @@ void gridSearchRBF(double[] _CList, double[] _gammaList) {
   for (int g = 0; g < _gammaList.length; g++) {
     for (int c = 0; c < _CList.length; c++) {
       trainRBFSVC(gamma=_gammaList[g], C=_CList[c]);
-      evaluateTrainSet(fold=5, showEvalDetails=false);        //5-fold cross validation
+      evaluateTrainSet(fold=5, isRegression=false, showEvalDetails=false);        //5-fold cross validation
       setModelDrawing(unit=_gammaList.length*2);         //set the model visualization (for 2D features)
       modelImageGrid[c][g] = pg.get();
       accuracyGrid[c][g] = accuracyTrain;
@@ -640,10 +946,50 @@ void drawGridSearchModels(float x, float y, float w, float h) {
   popMatrix();
 }
 
+void drawGridSearchModels_SVR(float x, float y, float w, float h) {
+  pushMatrix();
+  pushStyle();
+  translate(x, y);
+  float W = w/(float)EpsList.length;
+  float H = h/(float)gammaList.length;
+  for (int g = 0; g < gammaList.length; g++) {
+    for (int c = 0; c < EpsList.length; c++) {
+      float X = c*W;
+      float Y = g*H;
+      PImage p = modelImageGrid[c][g];
+      p.resize((int)W, (int)H);
+      image(p, X, Y);
+    }
+  }
+  popStyle();
+  popMatrix();
+}
+
+void drawGridSearchResults_SVR(float x, float y, float w, float h) {
+  pushMatrix();
+  pushStyle();
+  textSize(32);
+  translate(x, y);
+  float W = w/(float)EpsList.length;
+  float H = h/(float)gammaList.length;
+  for (int g = 0; g < gammaList.length; g++) {
+    for (int c = 0; c < EpsList.length; c++) {
+      float X = c*W;
+      float Y = g*H;
+      String s = "e="+nf((float)EpsList[c], 0, 4)+"\nG="+gammaList[g]+"\n"+nf((float)accuracyGrid[c][g], 0, 2);
+      fill(255);
+      text(s, X+10, Y+32);
+    }
+  }
+  popStyle();
+  popMatrix();
+}
+
 
 void drawGridSearchResults(float x, float y, float w, float h) {
   pushMatrix();
   pushStyle();
+  textSize(32);
   translate(x, y);
   float W = w/(float)CList.length;
   float H = h/(float)gammaList.length;
@@ -651,9 +997,9 @@ void drawGridSearchResults(float x, float y, float w, float h) {
     for (int c = 0; c < CList.length; c++) {
       float X = c*W;
       float Y = g*H;
-      String s = "C="+CList[c]+"\nGamma="+gammaList[g]+"\nAccuracy="+nf((float)accuracyGrid[c][g], 0, 2)+"%";
+      String s = "C="+CList[c]+"\nG="+gammaList[g]+"\n"+nf((float)accuracyGrid[c][g], 0, 2)+"%";
       fill(255);
-      text(s, X+10, Y+10);
+      text(s, X+10, Y+32);
     }
   }
   popStyle();

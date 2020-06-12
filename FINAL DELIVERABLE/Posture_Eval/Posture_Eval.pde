@@ -31,8 +31,7 @@ PImage src, threshBlur, dst;
 int blurSize = 12;
 int grayThreshold = 80;
 
-int sensorNum = 1;
-int rawData;
+
 boolean dataUpdated = false;
 
 
@@ -40,8 +39,12 @@ ArrayList<Contour> contours;
 
 String featureText = "Face";
 
-int dataNum = 1;
+int dataNum = 100;
+int sensorNum = 4;
 int dataIndex = 0;
+int[][] rawData = new int[sensorNum][dataNum];
+
+
 
 /**
  * Setup for the evaluation code set
@@ -61,8 +64,9 @@ void setup() {
   video.start();
 
   loadTrainARFF(dataset="accData.arff"); //load a ARFF dataset
+  loadTestARFF(dataset = "accData.arff");
   loadModel(model="LinearSVC.model"); //load a pretrained model.
-  evaluateTrainSet(fold = 5, isRegression = false, showEvalDetails=true); 
+  evaluateTestSet(isRegression = true, showEvalDetails=true); 
 
   //initialises the Serial communication. Each time Arduino sends a value, that value is loaded in a list
   for (int i = 0; i < Serial.list().length; i++) println("[", i, "]:", Serial.list()[i]);
@@ -105,7 +109,7 @@ void draw() {
     text(featureText, features[i].x, features[i].y-20);
 
     //predicts the label and reads it out real time on the screen 
-    float[] X = {features[i].width, rawData}; 
+    float[] X = {features[i].width, rawData[3][dataIndex]}; 
     String Y = getPrediction(X);
     textSize(12);
     textAlign(CENTER, CENTER);
@@ -133,14 +137,21 @@ void draw() {
 
 void serialEvent(Serial port) {
   String inData = port.readStringUntil('\n');
-  if (inData.charAt(0) == 'A') {
-    rawData = int(trim(inData.substring(1)));
-    //println(rawData);
-  }
-  if (rawData >= 900) {
-    port.write('a');
-  } else {
-    port.write('b');
+  if (dataIndex<dataNum) {
+    if (inData.charAt(0) == 'A') {
+      rawData[0][dataIndex] = int(trim(inData.substring(1)));
+    }
+    if (inData.charAt(0) == 'B') {
+      rawData[1][dataIndex] = int(trim(inData.substring(1)));
+    }
+    if (inData.charAt(0) == 'C') {
+      rawData[2][dataIndex] = int(trim(inData.substring(1)));
+      ++dataIndex;
+    }
+    if (inData.charAt(0) == 'D') {
+      rawData[3][dataIndex] = int(trim(inData.substring(1)));
+      ++dataIndex;
+    }
   }
   return;
 }

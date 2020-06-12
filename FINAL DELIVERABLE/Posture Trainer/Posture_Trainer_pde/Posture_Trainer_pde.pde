@@ -68,9 +68,9 @@ void setup() {
 
   loadTrainARFF(dataset="accData.arff"); //load a ARFF dataset
   println(train);
-  trainLinearSVC(C=64);               //train a KNN classifier
-  evaluateTrainSet(fold=5, showEvalDetails=true);  //5-fold cross validation
-  saveSVC(model="LinearSVC.model"); //save the model
+  trainLinearSVR(epsilon=0.1);               //train a KNN classifier
+  evaluateTrainSet(fold=5, isRegression = true, showEvalDetails=true);  //5-fold cross validation
+  saveModel(model="LinearSVC.model"); //save the model
 
   background(52);
 }
