@@ -163,8 +163,9 @@ void serialEvent(Serial port) {
       rawData[3][dataIndex] = int(trim(inData.substring(1)));
       ++dataIndex;
     }
+   
   }
-  port.write('a');
+  
   return;
 }
 
@@ -193,6 +194,12 @@ void keyPressed() {
   }
   if (key == 'C' || key == 'c') { //starts the measuring over
     csvData.clearRows();
+  }
+  if (key == 'L' || key == 'l') {
+    port.write('a');
+  }
+  if (key == 'K' || key == 'k') {
+    port.write('b');
   }
 }
 
