@@ -164,6 +164,7 @@ void serialEvent(Serial port) {
       ++dataIndex;
     }
   }
+  port.write('a');
   return;
 }
 
