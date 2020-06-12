@@ -44,7 +44,7 @@ void serialEvent(Serial port){
       ++dataIndex;
     }
     if (inData.charAt(0) == 'D') {
-      rawData[2][dataIndex] = int(trim(inData.substring(1)));
+      rawData[3][dataIndex] = int(trim(inData.substring(1)));
       ++dataIndex;
     }
   }
