@@ -1,3 +1,24 @@
+/**
+ * Training code for the posture determiner code
+ * @author Ilham El Bouhattaoui, Luuk Stavenuiter, Nadine Schellekens
+ * @id 1225930, 
+ * date: 31/05/2020
+ * 
+ * The baseline for this code is the same as the Posture code
+ * It will load the dataset made in the posture set
+ * It will then train a model with that set and save it
+ * It also shows the predictions in real time
+ * Uses example codes from Rong Hao Liang's github library for the course DBB220 Interactive Intelligent Products topic 2.2and 8.2
+ * Links to the source code: 
+ * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/2_2_Serial_Communication/Processing/p2_2c_SaveSerialAsARFF_A012
+ * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/HAARCascade
+ * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/SaveARFF_FaceRecognition
+ * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/TrainLSVC_FaceRecognition
+ *
+ *
+ *
+ **/
+ 
 import processing.serial.*;
 Serial port; 
 
@@ -25,6 +46,13 @@ String featureText = "Face";
 int dataNum = 1;
 int dataIndex = 0;
 
+/**
+ * Setup for the training code set
+ * Defines libraries used, and which features are selected
+ * Initialises serial communication
+ * Loads the training set and the model
+ * Evaluates the training set 
+ **/
 
 void setup() {
   size(640, 480);
@@ -34,14 +62,15 @@ void setup() {
   port.bufferUntil('\n'); // arduino ends each data packet with a carriage return 
   port.clear(); 
 
+   //when the code is run, the webcam is loaded
   video = new Capture(this, 640/div, 480/div);
   opencv = new OpenCV(this, 640/div, 480/div);
   opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);  
   video.start();
+  
   loadTrainARFF(dataset="accData.arff"); //load a ARFF dataset
   println(train);
   trainLinearSVC(C=64);               //train a KNN classifier
-  //setModelDrawing(unit=2); //set the model visualization (for 2D features)
   evaluateTrainSet(fold=5, showEvalDetails=true);  //5-fold cross validation
   saveSVC(model="LinearSVC.model"); //save the model
 
@@ -72,11 +101,9 @@ void draw() {
     noStroke();
     fill(255);
     text(featureText, features[i].x, features[i].y-20);
-    //println(features[i].x, features[i].y, features[i].width, features[i].height);
+   
 
-    if (dataUpdated) {
-      background(52);
-      fill(255);
+      //predicts the label and reads it out real time on the screen 
       float[] X = {features[i].width, rawData}; 
       String Y = getPrediction(X);
       textSize(32);
@@ -84,8 +111,8 @@ void draw() {
       String text = "Prediction: "+Y+
         "\n X="+features[i].width+
         "\n Y="+rawData;
-
-      text(text, width/2, height/2);
+       
+      text(text, 40, 50);
       switch(Y) {
       case "A": 
         port.write('a'); 
@@ -96,12 +123,12 @@ void draw() {
       default: 
         break;
       }
-      dataUpdated = false;
-      //println(features[i].width, rawData, Y);
+     
+      println(features[i].width, rawData, Y);
     }
-  }
+ 
   popMatrix();
-  //drawMouseCursor(labelIndex);
+
 }
 
 void serialEvent(Serial port) {
