@@ -36,11 +36,12 @@ ArrayList<Contour> contours;
 
 String featureText = "Face";
 
+int dataSave = 4;
 int dataNum = 100;
 int dataIndex = 0;
 
 int sensorNum = 4;
-int[][] rawData = new int[sensorNum][dataNum];
+int[][]rawData = new int[sensorNum][dataNum];
 
 Table csvData;
 boolean b_saveCSV = false;
@@ -123,13 +124,13 @@ void draw() {
     println(features[i].x, features[i].y, features[i].width, features[i].height);
 
     if (b_saveCSV) {
-      for (int n = 0; n < dataNum; n ++) {
+      for (int n = 0; n < dataSave; n ++) {
         TableRow newRow = csvData.addRow();
         newRow.setFloat("box", features[i].width);
         newRow.setFloat("sensor", rawData[3][dataIndex]);
         newRow.setString("label", getCharFromInteger(labelIndex));
         println("Label =" + labelIndex);
-      }
+      } 
       saveCSV(dataSetName, csvData);
       saveARFF(dataSetName, csvData);
 
@@ -148,12 +149,14 @@ void draw() {
 
 void serialEvent(Serial port) {
   String inData = port.readStringUntil('\n');
-   if (dataIndex<dataNum) {
+   if (dataIndex<dataSave) {
     if (inData.charAt(0) == 'A') {
       rawData[0][dataIndex] = int(trim(inData.substring(1)));
+      ++dataIndex;
     }
     if (inData.charAt(0) == 'B') {
       rawData[1][dataIndex] = int(trim(inData.substring(1)));
+      ++dataIndex;
     }
     if (inData.charAt(0) == 'C') {
       rawData[2][dataIndex] = int(trim(inData.substring(1)));
