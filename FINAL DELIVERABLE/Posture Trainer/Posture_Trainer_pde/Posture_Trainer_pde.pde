@@ -93,6 +93,7 @@ void draw() {
 
   // draw detected face area(s)
   for ( int i=0; i<features.length; i++ ) {
+    for(int n=0; n<dataNum; n++){
     noFill();
     stroke(255, 0, 0);
     rect( features[i].x, features[i].y, features[i].width, features[i].height );
@@ -102,13 +103,12 @@ void draw() {
 
 
     //predicts the label and reads it out real time on the screen 
-    float[] X = {features[i].width, rawData[3][dataIndex]}; 
+    float[] X = {features[i].width, rawData[3][n]}; 
     String Y = getPrediction(X);
-    textSize(32);
+    textSize(11);
     textAlign(CENTER, CENTER);
     String text = "Prediction: "+Y+
-      "\n X="+features[i].width+
-      "\n Y="+rawData;
+      "\n X="+X;
 
     text(text, 40, 50);
     switch(Y) {
@@ -124,7 +124,7 @@ void draw() {
 
     println(features[i].width, rawData, Y);
   }
-
+  }
   popMatrix();
 }
 
@@ -139,7 +139,6 @@ void serialEvent(Serial port) {
     }
     if (inData.charAt(0) == 'C') {
       rawData[2][dataIndex] = int(trim(inData.substring(1)));
-      ++dataIndex;
     }
     if (inData.charAt(0) == 'D') {
       rawData[3][dataIndex] = int(trim(inData.substring(1)));
