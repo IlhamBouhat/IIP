@@ -121,7 +121,7 @@ void draw() {
     fill(255);
     text(featureText, features[i].x, features[i].y-20);
     text(labelIndex, 0, 640);
-    println(features[i].x, features[i].y, features[i].width, features[i].height);
+    //println(features[i].x, features[i].y, features[i].width, features[i].height);
 
     if (b_saveCSV) {
       for (int n = 0; n < dataSave; n ++) {
@@ -152,11 +152,9 @@ void serialEvent(Serial port) {
    if (dataIndex<dataSave) {
     if (inData.charAt(0) == 'A') {
       rawData[0][dataIndex] = int(trim(inData.substring(1)));
-      ++dataIndex;
     }
     if (inData.charAt(0) == 'B') {
       rawData[1][dataIndex] = int(trim(inData.substring(1)));
-      ++dataIndex;
     }
     if (inData.charAt(0) == 'C') {
       rawData[2][dataIndex] = int(trim(inData.substring(1)));
@@ -166,9 +164,8 @@ void serialEvent(Serial port) {
       rawData[3][dataIndex] = int(trim(inData.substring(1)));
       ++dataIndex;
     }
-   
+   println(rawData[3][dataIndex]);
   }
-  
   return;
 }
 
@@ -192,9 +189,9 @@ void keyPressed() {
   if (key == 'S' || key == 's') { //saves to CSV
     b_saveCSV = true;
   }
-  if (key == ' ') { //cleans the data index
-    dataIndex = 0;
-  }
+ // if (key == ' ') { //cleans the data index
+ //   dataIndex = 0;
+ // }
   if (key == 'C' || key == 'c') { //starts the measuring over
     csvData.clearRows();
   }
