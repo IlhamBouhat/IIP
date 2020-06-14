@@ -36,10 +36,9 @@ ArrayList<Contour> contours;
 
 String featureText = "Face";
 
-int dataSave = 4;
+
 int dataNum = 100;
 int dataIndex = 0;
-
 int sensorNum = 4;
 int[][]rawData = new int[sensorNum][dataNum];
 
@@ -47,7 +46,7 @@ Table csvData;
 boolean b_saveCSV = false;
 String dataSetName = "accData"; 
 String[] attrNames = new String[]{"box", "sensor"};
-boolean[] attrIsNominal = new boolean[]{false, false, false};
+boolean[] attrIsNominal = new boolean[]{false, false, false, false};
 int labelIndex = 0;
 
 /**
@@ -122,19 +121,20 @@ void draw() {
     text(featureText, features[i].x, features[i].y-20);
     text(labelIndex, 0, 640);
     //println(features[i].x, features[i].y, features[i].width, features[i].height);
+    if (dataIndex == dataNum) {
+      if (b_saveCSV) {
+        for (int n = 0; n < dataNum; n ++) {
+          TableRow newRow = csvData.addRow();
+          newRow.setFloat("box", features[i].width);
+          newRow.setFloat("sensor", rawData[3][n]);
+          newRow.setString("label", getCharFromInteger(labelIndex));
+          println("Label =" + labelIndex);
+        } 
+        saveCSV(dataSetName, csvData);
+        saveARFF(dataSetName, csvData);
 
-    if (b_saveCSV) {
-      for (int n = 0; n < dataSave; n ++) {
-        TableRow newRow = csvData.addRow();
-        newRow.setFloat("box", features[i].width);
-        newRow.setFloat("sensor", rawData[3][dataIndex]);
-        newRow.setString("label", getCharFromInteger(labelIndex));
-        println("Label =" + labelIndex);
-      } 
-      saveCSV(dataSetName, csvData);
-      saveARFF(dataSetName, csvData);
-
-      b_saveCSV = false;
+        b_saveCSV = false;
+      }
     }
   }
   popMatrix();
@@ -149,7 +149,7 @@ void draw() {
 
 void serialEvent(Serial port) {
   String inData = port.readStringUntil('\n');
-   if (dataIndex<dataSave) {
+  if (dataIndex<dataNum) {
     if (inData.charAt(0) == 'A') {
       rawData[0][dataIndex] = int(trim(inData.substring(1)));
     }
@@ -158,13 +158,14 @@ void serialEvent(Serial port) {
     }
     if (inData.charAt(0) == 'C') {
       rawData[2][dataIndex] = int(trim(inData.substring(1)));
-      ++dataIndex;
+      //++dataIndex;
     }
     if (inData.charAt(0) == 'D') {
       rawData[3][dataIndex] = int(trim(inData.substring(1)));
       ++dataIndex;
+      println(rawData[3][dataIndex]);
     }
-   println(rawData[3][dataIndex]);
+    
   }
   return;
 }
@@ -189,9 +190,9 @@ void keyPressed() {
   if (key == 'S' || key == 's') { //saves to CSV
     b_saveCSV = true;
   }
- // if (key == ' ') { //cleans the data index
- //   dataIndex = 0;
- // }
+  // if (key == ' ') { //cleans the data index
+  //   dataIndex = 0;
+  // }
   if (key == 'C' || key == 'c') { //starts the measuring over
     csvData.clearRows();
   }
