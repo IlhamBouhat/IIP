@@ -45,7 +45,7 @@ int[][]rawData = new int[sensorNum][dataNum];
 Table csvData;
 boolean b_saveCSV = false;
 String dataSetName = "accData"; 
-String[] attrNames = new String[]{"box", "sensor"};
+String[] attrNames = new String[]{"box", "sensor", "label"};
 boolean[] attrIsNominal = new boolean[]{false, false, false, false};
 int labelIndex = 0;
 
@@ -127,7 +127,7 @@ void draw() {
           TableRow newRow = csvData.addRow();
           newRow.setFloat("box", features[i].width);
           newRow.setFloat("sensor", rawData[3][n]);
-          newRow.setString("label", getCharFromInteger(labelIndex));
+          newRow.setFloat("label", labelIndex);
           println("Label =" + labelIndex);
         } 
         saveCSV(dataSetName, csvData);

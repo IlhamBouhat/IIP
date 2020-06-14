@@ -25,7 +25,7 @@ void draw(){
       if(n==1) fill(0, 255, 0);
       if(n==2) fill(0, 0, 255);
       if(n==3) fill(100,100,100);
-      ellipse(i*pointSize, rawData[n][i]/100, pointSize, pointSize);
+      ellipse(i*pointSize, rawData[n][i], pointSize, pointSize);
     }
   }
 }
