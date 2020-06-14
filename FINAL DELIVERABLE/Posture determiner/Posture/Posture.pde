@@ -37,7 +37,7 @@ ArrayList<Contour> contours;
 String featureText = "Face";
 
 
-int dataNum = 100;
+int dataNum = 1;
 int dataIndex = 0;
 int sensorNum = 4;
 int[][]rawData = new int[sensorNum][dataNum];
@@ -119,9 +119,11 @@ void draw() {
     noStroke();
     fill(255);
     text(featureText, features[i].x, features[i].y-20);
-    text(labelIndex, 0, 640);
+    text(labelIndex, 0, 0);
+    textSize(12);
+    textAlign(CENTER, CENTER);
     //println(features[i].x, features[i].y, features[i].width, features[i].height);
-    if (dataIndex == dataNum) {
+    //if (dataIndex == dataNum) {
       if (b_saveCSV) {
         for (int n = 0; n < dataNum; n ++) {
           TableRow newRow = csvData.addRow();
@@ -129,14 +131,13 @@ void draw() {
           newRow.setFloat("sensor", rawData[3][n]);
           newRow.setFloat("label", labelIndex);
           println("Label =" + labelIndex);
-        } 
+       } 
         saveCSV(dataSetName, csvData);
         saveARFF(dataSetName, csvData);
 
         b_saveCSV = false;
       }
     }
-  }
   popMatrix();
 
   keyPressed();
@@ -190,9 +191,6 @@ void keyPressed() {
   if (key == 'S' || key == 's') { //saves to CSV
     b_saveCSV = true;
   }
-  // if (key == ' ') { //cleans the data index
-  //   dataIndex = 0;
-  // }
   if (key == 'C' || key == 'c') { //starts the measuring over
     csvData.clearRows();
   }
