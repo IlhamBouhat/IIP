@@ -124,7 +124,7 @@ void draw() {
     textAlign(CENTER, CENTER);
     //println(features[i].x, features[i].y, features[i].width, features[i].height);
     //if (dataIndex == dataNum) {
-      if (b_saveCSV) {
+      if (b_saveCSV == true) {
         for (int n = 0; n < dataNum; n ++) {
           TableRow newRow = csvData.addRow();
           newRow.setFloat("box", features[i].width);
@@ -134,8 +134,6 @@ void draw() {
        } 
         saveCSV(dataSetName, csvData);
         saveARFF(dataSetName, csvData);
-
-        b_saveCSV = false;
       }
     }
   popMatrix();
@@ -190,6 +188,9 @@ void mousePressed() {
 void keyPressed() {
   if (key == 'S' || key == 's') { //saves to CSV
     b_saveCSV = true;
+  }
+  else{
+    b_saveCSV = false;
   }
   if (key == 'C' || key == 'c') { //starts the measuring over
     csvData.clearRows();
