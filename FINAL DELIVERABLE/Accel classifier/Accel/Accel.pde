@@ -18,35 +18,22 @@
 import processing.serial.*;
 Serial port;
 
-
-import gab.opencv.*;
-import processing.video.*;
 import java.awt.*;
 
-
-Capture video;
-OpenCV opencv;
-
-int div = 2;
-PImage src, threshBlur, dst;
-int blurSize = 12;
-int grayThreshold = 80;
-
-ArrayList<Contour> contours;
-
-String featureText = "Face";
 
 int dataNum = 1;
 int dataIndex = 0;
 
-int sensorNum = 1;
-int rawData;
+int sensorNum = 3;
+int rawData1;
+int rawData2;
+int rawData3;
 
 Table csvData;
 boolean b_saveCSV = false;
 String dataSetName = "accData"; 
-String[] attrNames = new String[]{"box", "sensor"};
-boolean[] attrIsNominal = new boolean[]{false, false, true};
+String[] attrNames = new String[]{"x", "y", "z", "Label"};
+boolean[] attrIsNominal = new boolean[]{false, false, false, true};
 int labelIndex = 0;
 
 /**
@@ -58,16 +45,6 @@ int labelIndex = 0;
 
 void setup() {
   size(640, 480);
-
-  //initialises the video library and opencv library
-  video = new Capture(this, 640/div, 480/div);
-  opencv = new OpenCV(this, 640/div, 480/div);
-
-  //when the code is run, the webcam is loaded
-  video.start();
-  fill(255);
-  textSize(12);
-  textAlign(LEFT, TOP);
 
   //initialises the Serial communication. Each time Arduino sends a value, that value is loaded in a list
   for (int i = 0; i < Serial.list().length; i++) println("[", i, "]:", Serial.list()[i]);
@@ -101,32 +78,12 @@ void draw() {
   scale(2);
 
   //https://github.com/atduskgreg/opencv-processing/blob/master/src/gab/opencv/OpenCV.java
-
-  opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
-  opencv.useColor();
-  featureText = "Face";   
-  opencv.loadImage(video);
-  src = opencv.getSnapshot();
-  image(src, 0, 0);
-
-  Rectangle[] features = opencv.detect();
-
-  // draw detected face area(s)
-  for ( int i=0; i<features.length; i++ ) {
-    noFill();
-    stroke(255, 0, 0);
-    rect( features[i].x, features[i].y, features[i].width, features[i].height );
-    noStroke();
-    fill(255);
-    text(featureText, features[i].x, features[i].y-20);
-    text(labelIndex, 0, 640);
-    println(features[i].x, features[i].y, features[i].width, features[i].height);
-
     if (b_saveCSV) {
       for (int n = 0; n < dataNum; n ++) {
         TableRow newRow = csvData.addRow();
-        newRow.setFloat("box", features[i].width);
-        newRow.setFloat("sensor", rawData);
+        newRow.setFloat("x", rawData1);
+        newRow.setFloat("y", rawData2);
+        newRow.setFloat("z", rawData3);
         newRow.setString("label", getCharFromInteger(labelIndex));
         println("Label =" + labelIndex);
       }
@@ -135,7 +92,6 @@ void draw() {
 
       b_saveCSV = false;
     }
-  }
   popMatrix();
 
   keyPressed();
@@ -148,21 +104,21 @@ void draw() {
 
 void serialEvent(Serial port) {
   String inData = port.readStringUntil('\n');
-  if (inData.charAt(0) == 'A') {
-    rawData = int(trim(inData.substring(1)));
-    println(rawData);
+  if (inData.charAt(0) == 'B') {
+    rawData1 = int(trim(inData.substring(1)));
+    println(rawData1);
   }
-  if (rawData >= 900) {
-    port.write('a');
-  } else {
-    port.write('b');
+  if (inData.charAt(0) == 'C') {
+    rawData2 = int(trim(inData.substring(1)));
+    println(rawData2);
+  }
+  if (inData.charAt(0) == 'D') {
+    rawData3 = int(trim(inData.substring(1)));
+    println(rawData3);
   }
   return;
 }
 
-void captureEvent(Capture c) {
-  c.read();
-}
 
 /**
  * On the right mouseclick, one changes the label index from A to B
