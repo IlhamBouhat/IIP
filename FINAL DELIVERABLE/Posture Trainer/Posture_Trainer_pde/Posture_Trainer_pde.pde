@@ -42,7 +42,7 @@ String featureText = "Face";
 int dataNum = 100;
 int dataIndex = 0;
 int sensorNum = 4;
-int[][] rawData = new int[sensorNum][dataNum];
+int rawData;
 
 /**
  * Setup for the training code set
@@ -68,9 +68,9 @@ void setup() {
 
   loadTrainARFF(dataset="accData.arff"); //load a ARFF dataset
   println(train);
-  trainLinearSVR(epsilon=0.1);               //train a KNN classifier
+  trainLinearSVR(epsilon=0.125);               //train a KNN classifier
   evaluateTrainSet(fold=5, isRegression = true, showEvalDetails=true);  //5-fold cross validation
-  saveModel(model="LinearSVC.model"); //save the model
+  saveModel(model="Regressor.model"); //save the model
 
   background(52);
 }
@@ -103,12 +103,12 @@ void draw() {
 
 
     //predicts the label and reads it out real time on the screen 
-    float[] X = {features[i].width, rawData[3][n]}; 
+    /*float[] X = {features[i].width, rawData}; 
     String Y = getPrediction(X);
     textSize(11);
     textAlign(CENTER, CENTER);
     String text = "Prediction: "+Y+
-      "\n X="+X;
+      "\n X="+X; 
 
     text(text, 40, 50);
     switch(Y) {
@@ -120,9 +120,9 @@ void draw() {
       break;
     default: 
       break;
-    }
+    } */
 
-    println(features[i].width, rawData, Y);
+    //println(features[i].width, rawData, Y);
   }
   }
   popMatrix();
@@ -130,21 +130,9 @@ void draw() {
 
 void serialEvent(Serial port) {
   String inData = port.readStringUntil('\n');
-  if (dataIndex<dataNum) {
     if (inData.charAt(0) == 'A') {
-      rawData[0][dataIndex] = int(trim(inData.substring(1)));
+      rawData = int(trim(inData.substring(1)));
     }
-    if (inData.charAt(0) == 'B') {
-      rawData[1][dataIndex] = int(trim(inData.substring(1)));
-    }
-    if (inData.charAt(0) == 'C') {
-      rawData[2][dataIndex] = int(trim(inData.substring(1)));
-    }
-    if (inData.charAt(0) == 'D') {
-      rawData[3][dataIndex] = int(trim(inData.substring(1)));
-      ++dataIndex;
-    }
-  }
   return;
 }
 
