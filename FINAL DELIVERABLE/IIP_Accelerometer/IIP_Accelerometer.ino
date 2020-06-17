@@ -64,10 +64,10 @@ void loop() {
     Serial.flush();
     //value_A0 = analogRead(IN_A0); // reads the analog input from the IR distance sensor
     //value_D0 = digitalRead(IN_D0);// reads the digital input from the IR distance sensor
-    sendDataXToProcessing('A', accelerometer_x);
-    sendDataYToProcessing('B', accelerometer_y);
-    sendDataZToProcessing('C', accelerometer_z);
-    sendDataCMToProcessing('D', cm);
+    sendDataXToProcessing('B', accelerometer_x);
+    sendDataYToProcessing('C', accelerometer_y);
+    sendDataZToProcessing('D', accelerometer_z);
+    sendDataCMToProcessing('A', cm);
     }
   /* print out data
   Serial.print("aX = "); Serial.print(convert_int16_to_str(accelerometer_x));
@@ -97,7 +97,7 @@ void sendDataYToProcessing(char symbol, int accelerometer_y){
 void sendDataZToProcessing(char symbol, int accelerometer_z){
   Serial.print(symbol);
   Serial.println(accelerometer_z);
-}
+} 
 
 void sendDataCMToProcessing(char symbol, int cm){
   Serial.print(symbol);

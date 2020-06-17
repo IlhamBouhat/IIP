@@ -40,7 +40,7 @@ String featureText = "Face";
 int dataNum = 1;
 int dataIndex = 0;
 int sensorNum = 4;
-int[][]rawData = new int[sensorNum][dataNum];
+int rawData;
 
 Table csvData;
 boolean b_saveCSV = false;
@@ -128,7 +128,7 @@ void draw() {
         for (int n = 0; n < dataNum; n ++) {
           TableRow newRow = csvData.addRow();
           newRow.setFloat("box", features[i].width);
-          newRow.setFloat("sensor", rawData[3][n]);
+          newRow.setFloat("sensor", rawData);
           newRow.setFloat("label", labelIndex);
           println("Label =" + labelIndex);
        } 
@@ -148,24 +148,12 @@ void draw() {
 
 void serialEvent(Serial port) {
   String inData = port.readStringUntil('\n');
-  if (dataIndex<dataNum) {
     if (inData.charAt(0) == 'A') {
-      rawData[0][dataIndex] = int(trim(inData.substring(1)));
-    }
-    if (inData.charAt(0) == 'B') {
-      rawData[1][dataIndex] = int(trim(inData.substring(1)));
-    }
-    if (inData.charAt(0) == 'C') {
-      rawData[2][dataIndex] = int(trim(inData.substring(1)));
-      //++dataIndex;
-    }
-    if (inData.charAt(0) == 'D') {
-      rawData[3][dataIndex] = int(trim(inData.substring(1)));
-      ++dataIndex;
-      println(rawData[3][dataIndex]);
+      rawData = int(trim(inData.substring(1)));
+      println(rawData);
     }
     
-  }
+ // }
   return;
 }
 
