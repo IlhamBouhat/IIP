@@ -21,13 +21,11 @@ Serial port;
 import java.awt.*;
 
 
-int dataNum = 1;
+int dataNum = 100;
 int dataIndex = 0;
 
 int sensorNum = 3;
-int rawData1;
-int rawData2;
-int rawData3;
+int [][] rawData = new int[sensorNum][dataNum];
 
 Table csvData;
 boolean b_saveCSV = false;
@@ -44,7 +42,7 @@ int labelIndex = 0;
  **/
 
 void setup() {
-  size(640, 480);
+  size(500, 500);
 
   //initialises the Serial communication. Each time Arduino sends a value, that value is loaded in a list
   for (int i = 0; i < Serial.list().length; i++) println("[", i, "]:", Serial.list()[i]);
@@ -73,24 +71,37 @@ void setup() {
  * These variables are then saved to a parameter {@ code A} or {@ code B}, being good and bad posture
  **/
 void draw() {
-  background(0);
-  pushMatrix();
-  scale(2);
+  background(255);
+  float pointSize = height/dataNum;
+  for (int i = 0; i < dataIndex; i++) {
+    for (int n = 0; n < sensorNum; n++) {
+      noStroke();
+      if (n==0) fill(255, 0, 0);
+      if (n==1) fill(0, 255, 0);
+      if (n==2) fill(0, 0, 255);
+      ellipse(i*pointSize, rawData[n][i], pointSize, pointSize);
+      textSize(pointSize);
+      textAlign(CENTER, CENTER);
+      fill(0);
+      text(getCharFromInteger(labelIndex), i*pointSize, rawData[n][i]);
+    }
+  }
 
   //https://github.com/atduskgreg/opencv-processing/blob/master/src/gab/opencv/OpenCV.java
+  if(dataIndex==dataNum){
     if (b_saveCSV) {
       for (int n = 0; n < dataNum; n ++) {
         TableRow newRow = csvData.addRow();
-        newRow.setFloat("x", rawData1);
-        newRow.setFloat("y", rawData2);
-        newRow.setFloat("z", rawData3);
+        newRow.setFloat("x", rawData[0][n]);
+        newRow.setFloat("y", rawData[1][n]);
+        newRow.setFloat("z", rawData[2][n]);
         newRow.setString("label", getCharFromInteger(labelIndex));
         println("Label =" + labelIndex);
       }
       saveCSV(dataSetName, csvData);
       saveARFF(dataSetName, csvData);
     }
-  popMatrix();
+  }
 
   keyPressed();
   keyReleased();
@@ -103,17 +114,20 @@ void draw() {
 
 void serialEvent(Serial port) {
   String inData = port.readStringUntil('\n');
+  if(dataIndex<dataNum){
   if (inData.charAt(0) == 'B') {
-    rawData1 = int(trim(inData.substring(1)));
-    println(rawData1);
+    rawData[0][dataIndex] = int(trim(inData.substring(1)));
+    //println(rawData[0][dataIndex]);
   }
   if (inData.charAt(0) == 'C') {
-    rawData2 = int(trim(inData.substring(1)));
-    println(rawData2);
+    rawData[1][dataIndex] = int(trim(inData.substring(1)));
+    //println(rawData[1][dataIndex]);
   }
   if (inData.charAt(0) == 'D') {
-    rawData3 = int(trim(inData.substring(1)));
-    println(rawData3);
+    rawData[2][dataIndex] = int(trim(inData.substring(1)));
+    ++dataIndex;
+    //println(rawData[2][dataIndex]);
+  }
   }
   return;
 }
