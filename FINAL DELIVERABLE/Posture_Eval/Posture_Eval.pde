@@ -63,8 +63,8 @@ void setup() {
   opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);  
   video.start();
 
-  loadTrainARFF(dataset="accData.arff"); //load a ARFF dataset
-  loadTestARFF(dataset = "TestData.arff");
+  loadTrainARFF(dataset="PostureTrainData.arff"); //load a ARFF dataset
+  loadTestARFF(dataset = "PostureTestData.arff");
   loadModel(model="Regressor.model"); //load a pretrained model.
   evaluateTestSet(isRegression = true, showEvalDetails=true); 
 

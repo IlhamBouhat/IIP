@@ -7,7 +7,7 @@ boolean showModelOnly = false;
 
 void setup() {
   size(500, 500);             //set a canvas
-  loadTrainARFF(dataset="accData.arff"); //load a ARFF dataset
+  loadTrainARFF(dataset="PostureTrainData.arff"); //load a ARFF dataset
   EpsSearchLSVR(EpsArray);
 }
 

@@ -44,7 +44,7 @@ int rawData;
 
 Table csvData;
 boolean b_saveCSV = false;
-String dataSetName = "TestData"; 
+String dataSetName = "PostureTrainData"; 
 String[] attrNames = new String[]{"box", "sensor", "label"};
 boolean[] attrIsNominal = new boolean[]{false, false, false, false};
 int labelIndex = 0;
