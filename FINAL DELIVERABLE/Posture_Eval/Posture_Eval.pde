@@ -109,9 +109,9 @@ void draw() {
     text(featureText, features[i].x, features[i].y-20);
 
     //predicts the label and reads it out real time on the screen 
-    /*float[] X = {features[i].width, rawData[3][dataIndex]}; 
-    String Y = getPrediction(X);
-    textSize(12);
+    float[] X = {features[i].width, rawData}; 
+    double Y = getPredictionIndex(X);
+    /*textSize(12);
     textAlign(CENTER, CENTER);
     String text = "Prediction: "+Y+
       "\n X="+features[i].width+

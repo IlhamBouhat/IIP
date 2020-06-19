@@ -177,9 +177,6 @@ void keyPressed() {
   if (key == 'S' || key == 's') { //saves to CSV
     b_saveCSV = true;
   }
-  else{
-    b_saveCSV = false;
-  }
   if (key == 'C' || key == 'c') { //starts the measuring over
     csvData.clearRows();
   }
@@ -190,6 +187,13 @@ void keyPressed() {
     port.write('b');
   }
 }
+
+void keyReleased(){
+if(key == 'S' || key == 's'){
+b_saveCSV = false;
+}
+}
+
 
 String getCharFromInteger(double i) { //0 = A, 1 = B, and so forth
   return ""+char(min((int)(i+'A'), 90));
