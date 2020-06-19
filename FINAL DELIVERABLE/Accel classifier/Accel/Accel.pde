@@ -89,12 +89,11 @@ void draw() {
       }
       saveCSV(dataSetName, csvData);
       saveARFF(dataSetName, csvData);
-
-      b_saveCSV = false;
     }
   popMatrix();
 
   keyPressed();
+  keyReleased();
 }
 
 /**
@@ -143,6 +142,13 @@ void keyPressed() {
     csvData.clearRows();
   }
 }
+
+void keyReleased(){
+if(key == 'S' || key == 's'){
+b_saveCSV = false;
+}
+}
+
 
 String getCharFromInteger(double i) { //0 = A, 1 = B, and so forth
   return ""+char(min((int)(i+'A'), 90));

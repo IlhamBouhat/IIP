@@ -139,6 +139,7 @@ void draw() {
   popMatrix();
 
   keyPressed();
+  keyReleased();
 }
 
 /**
