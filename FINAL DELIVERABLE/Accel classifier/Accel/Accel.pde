@@ -23,9 +23,10 @@ import java.awt.*;
 
 int dataNum = 100;
 int dataIndex = 0;
+int dataSet = 0;
 
 int sensorNum = 3;
-int [][] rawData = new int[sensorNum][dataNum];
+int[][] rawData = new int[sensorNum][dataNum];
 
 Table csvData;
 boolean b_saveCSV = false;
@@ -88,20 +89,22 @@ void draw() {
   }
 
   //https://github.com/atduskgreg/opencv-processing/blob/master/src/gab/opencv/OpenCV.java
-  if(dataIndex==dataNum){
+  //if(dataIndex == dataNum){
     if (b_saveCSV) {
-      for (int n = 0; n < dataNum; n ++) {
+      for (int n = dataSet; n < dataIndex; n ++) {
         TableRow newRow = csvData.addRow();
         newRow.setFloat("x", rawData[0][n]);
         newRow.setFloat("y", rawData[1][n]);
         newRow.setFloat("z", rawData[2][n]);
-        newRow.setString("label", getCharFromInteger(labelIndex));
+        newRow.setString("Label", getCharFromInteger(labelIndex));
         println("Label =" + labelIndex);
       }
       saveCSV(dataSetName, csvData);
       saveARFF(dataSetName, csvData);
+      b_saveCSV = false;
+      dataSet = dataIndex;
     }
-  }
+  //}
 
   keyPressed();
   keyReleased();
@@ -117,16 +120,16 @@ void serialEvent(Serial port) {
   if(dataIndex<dataNum){
   if (inData.charAt(0) == 'B') {
     rawData[0][dataIndex] = int(trim(inData.substring(1)));
-    //println(rawData[0][dataIndex]);
+    println(rawData[0][dataIndex]);
   }
   if (inData.charAt(0) == 'C') {
     rawData[1][dataIndex] = int(trim(inData.substring(1)));
-    //println(rawData[1][dataIndex]);
+    println(rawData[1][dataIndex]);
   }
   if (inData.charAt(0) == 'D') {
     rawData[2][dataIndex] = int(trim(inData.substring(1)));
+    println(rawData[2][dataIndex]);
     ++dataIndex;
-    //println(rawData[2][dataIndex]);
   }
   }
   return;
