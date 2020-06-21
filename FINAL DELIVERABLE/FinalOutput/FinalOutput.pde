@@ -155,9 +155,9 @@ void draw() {
 }
 
 class PopupWindow extends PApplet {
-  public void setup(){
-    size(640,480);
-  }
+  public void settings() {
+  size(640, 480);
+}
   
   public void draw(){
     background(255,0,0);
