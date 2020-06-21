@@ -45,8 +45,8 @@ int rawData;
 Table csvData;
 boolean b_saveCSV = false;
 String dataSetName = "PostureTrainData"; 
-String[] attrNames = new String[]{"box", "sensor", "label"};
-boolean[] attrIsNominal = new boolean[]{false, false, false, false};
+String[] attrNames = new String[]{"box_width", "box_height", "sensor", "label"};
+boolean[] attrIsNominal = new boolean[]{false, false, false,false, false};
 int labelIndex = 0;
 
 /**
@@ -127,7 +127,8 @@ void draw() {
       if (b_saveCSV == true) {
         for (int n = 0; n < dataNum; n ++) {
           TableRow newRow = csvData.addRow();
-          newRow.setFloat("box", features[i].width);
+          newRow.setFloat("box_width", features[i].width);
+          newRow.setFloat("box_height", features[i].width);
           newRow.setFloat("sensor", rawData);
           newRow.setFloat("label", labelIndex);
           println("Label =" + labelIndex);
