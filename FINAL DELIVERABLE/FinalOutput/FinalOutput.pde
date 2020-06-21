@@ -58,8 +58,12 @@ int count = 0;
  * Loads the training set and the model
  * Evaluates the training set 
  **/
+ 
+ void settings (){
+   size(640, 480);
+ } 
 void setup() {
-  size(640, 480);
+  
  
   
   //initialises the video library and opencv library
