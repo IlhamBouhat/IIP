@@ -60,21 +60,21 @@ boolean read = true;
  * Loads the training set and the model
  * Evaluates the training set 
  **/
- 
- void settings (){
-   size(640, 480);
- } 
+
+void settings () {
+  size(640, 480);
+} 
 void setup() {
-  
- 
-  
+
+
+
   //initialises the video library and opencv library
   video = new Capture(this, 640/div, 480/div);
   opencv = new OpenCV(this, 640/div, 480/div);
   opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);  
   video.start();
 
- 
+
 
 
   //initialises the Serial communication. Each time Arduino sends a value, that value is loaded in a list
@@ -84,14 +84,15 @@ void setup() {
   port.bufferUntil('\n'); // arduino ends each data packet with a carriage return 
   port.clear(); 
 
-  
+
   instances[0] = loadTrainARFFToInstances(dataset="PostureTrainData.arff");
-  
+  instances[1] = loadTrainARFFToInstances(dataset="AccData.arff");
   attributes[0] = loadAttributesFromInstances(instances[0]);
- 
+
+  attributes[1] = loadAttributesFromInstances(instances[1]);
   classifiers[0] = loadModelToClassifier(model="Regressor.model"); //load a pretrained model.
   classifiers[1] = loadModelToClassifier(model="LinearSVC.model"); //load a pretrained model.
-  
+
   background(52);
   noLoop();
 }
@@ -149,48 +150,51 @@ void draw() {
      break;
      } */
 
-if (Y >= 0.2){
+    if (Y >= 0.2) {
       count++;
-      if(count >10){
+      if (count >10) {
         slouch = true;
         count = 0;
-        if (slouch == true){ 
-        noLoop();
-        println("doe normaal");
-        PopupWindow window = new PopupWindow();
-        runSketch(new String[]{"PopupWindow"}, window);
-        read = false; 
+        if (slouch == true) { 
+          noLoop();
+          println("doe normaal");
+          PopupWindow window = new PopupWindow();
+          runSketch(new String[]{"PopupWindow"}, window);
+          read = false;
         }
       }
     }
     println(features[i].width, rawData, Y);
   }
-  
+
   popMatrix();
 }
 
 class PopupWindow extends PApplet {
   public void settings() {
-  size(640, 480);
-}
+    size(640, 480);
+  }
 
-public void setup (){
-  instances[1] = loadTrainARFFToInstances(dataset="AccData.arff");
-   attributes[1] = loadAttributesFromInstances(instances[1]);
-} 
+  public void setup () {
+  } 
+
+  public void draw() {
+    background(255, 0, 0);
+  }
   
-  public void draw(){
-    background(255,0,0);
+  public void mousePressed(){
+    background(0, 255, 0);
     
   }
-  
 } 
+
+
 void serialEvent(Serial port) {
   String inData = port.readStringUntil('\n');
-  if(read == true){
-  if (inData.charAt(0) == 'A') {
-    rawData = int(trim(inData.substring(1)));
-  }
+  if (read == true) {
+    if (inData.charAt(0) == 'A') {
+      rawData = int(trim(inData.substring(1)));
+    }
   }
   return;
 }
