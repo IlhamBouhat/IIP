@@ -185,13 +185,13 @@ class PopupWindow extends PApplet {
 
   public void draw() {
     background(0, 0, 0);
-    for (int n = dataSet; n<dataIndex; n++) {
-      float[] X2 = {accData[0], accData[1], accData[2]);
-      double Y2 = getPrediction(X);
+    
+      float[] X = {accData[0], accData[1], accData[2]);
+      double Y = getPrediction(X);
       
-      println(X2,Y2);
+      println(X,Y);
       
-    }
+    
   }
 } 
 
