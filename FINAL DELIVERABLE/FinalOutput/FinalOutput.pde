@@ -44,6 +44,7 @@ ArrayList<Contour> contours;
 
 String featureText = "Face";
 
+int dataSet = 0;
 int dataNum = 10;
 int sensorNum = 4;
 int dataIndex = 0;
@@ -185,15 +186,17 @@ class PopupWindow extends PApplet {
 
   public void draw() {
     background(0, 0, 0);
-    
-      float[] X = {accData[0], accData[1], accData[2]);
-      double Y = getPrediction(X);
+      for (int n = dataSet; n <dataIndex; n++){
+      float[] X = {accData[0][n], accData[1][n], accData[2][n]};
+      String Y = getPrediction(X);
       
       println(X,Y);
       
     
-  }
-} 
+  
+}
+}
+}
 
 
 void serialEvent(Serial port) {
