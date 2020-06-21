@@ -23,6 +23,10 @@ import gab.opencv.*;
 import processing.video.*;
 import java.awt.*;
 
+ArrayList<Attribute>[] attributes = new ArrayList[2];
+Instances[] instances = new Instances[2];
+Classifier[] classifiers = new Classifier[2];
+
 Capture video;
 OpenCV opencv;
 
@@ -34,7 +38,6 @@ int grayThreshold = 80;
 
 boolean dataUpdated = false;
 
-
 ArrayList<Contour> contours;
 
 String featureText = "Face";
@@ -45,12 +48,6 @@ int dataIndex = 0;
 int rawData;
 int count = 0; 
 
-ArrayList<Attribute>[] attributes = new ArrayList[2];
-Instances[] instances1 = new Instances[1];
-Instances[] instances2 = new Instances[1];
-Classifier[] classifiers = new Classifier[2];
-
-
 /**
  * Setup for the evaluation code set
  * Defines libraries used, and which features are selected
@@ -60,20 +57,15 @@ Classifier[] classifiers = new Classifier[2];
  **/
 void setup() {
   size(640, 480);
-
-
+ 
+  
   //initialises the video library and opencv library
   video = new Capture(this, 640/div, 480/div);
   opencv = new OpenCV(this, 640/div, 480/div);
   opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);  
   video.start();
 
-  instances1[0] = loadTrainARFFToInstances(dataset="PostureTrainData.arff");
-  instances2[0] = loadTrainARFFToInstances(dataset="AccData.arff");
-  attributes[0] = loadAttributesFromInstances(instances1[0]);
-  attributes[1] = loadAttributesFromInstances(instances2[0]);
-  classifiers[0] = loadModelToClassifier(model="Regressor.model"); //load a pretrained model.
-  classifiers[1] = loadModelToClassifier(model="LinearSVC.model"); //load a pretrained model.
+ 
 
 
   //initialises the Serial communication. Each time Arduino sends a value, that value is loaded in a list
@@ -83,6 +75,14 @@ void setup() {
   port.bufferUntil('\n'); // arduino ends each data packet with a carriage return 
   port.clear(); 
 
+  
+  instances[0] = loadTrainARFFToInstances(dataset="PostureTrainData.arff");
+  instances[1] = loadTrainARFFToInstances(dataset="AccData.arff");
+  attributes[0] = loadAttributesFromInstances(instances[0]);
+  attributes[1] = loadAttributesFromInstances(instances[1]);
+  classifiers[0] = loadModelToClassifier(model="Regressor.model"); //load a pretrained model.
+  classifiers[1] = loadModelToClassifier(model="LinearSVC.model"); //load a pretrained model.
+  
   background(52);
 }
 
@@ -118,7 +118,7 @@ void draw() {
 
     //predicts the label and reads it out real time on the screen 
     float[] X = {features[i].width, rawData}; 
-    double Y = getPredictionIndex(X);
+    double Y = getPredictionIndex(X, classifiers[0], attributes[0]);
     if (Y >= 1){
       count++;
       if(count >10){
