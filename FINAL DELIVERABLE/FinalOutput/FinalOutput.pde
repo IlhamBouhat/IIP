@@ -149,18 +149,13 @@ void draw() {
      break;
      } */
 
-
-    println(features[i].width, rawData, Y);
-  }
-  
-  
-  if (Y >= 0.2){
-      noLoop();
+if (Y >= 0.2){
       count++;
       if(count >10){
         slouch = true;
         count = 0;
         if (slouch == true){ 
+        noLoop();
         println("doe normaal");
         PopupWindow window = new PopupWindow();
         runSketch(new String[]{"PopupWindow"}, window);
@@ -168,6 +163,9 @@ void draw() {
         }
       }
     }
+    println(features[i].width, rawData, Y);
+  }
+  
   popMatrix();
 }
 
