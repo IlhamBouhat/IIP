@@ -119,7 +119,7 @@ void draw() {
     //predicts the label and reads it out real time on the screen 
     float[] X = {features[i].width, rawData}; 
     double Y = getPredictionIndex(X, classifiers[0], attributes[0]);
-    if (Y >= 1){
+    if (Y >= 0.2){
       count++;
       if(count >10){
         println("doe normaal");
