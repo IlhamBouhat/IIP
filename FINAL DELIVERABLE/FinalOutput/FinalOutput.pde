@@ -44,7 +44,7 @@ ArrayList<Contour> contours;
 
 String featureText = "Face";
 
-int dataNum = 100;
+int dataNum = 10;
 int sensorNum = 4;
 int dataIndex = 0;
 int rawData;
@@ -93,6 +93,7 @@ void setup() {
   classifiers[1] = loadModelToClassifier(model="LinearSVC.model"); //load a pretrained model.
   
   background(52);
+  noLoop();
 }
 
 /**
@@ -102,6 +103,7 @@ void setup() {
  **/
 
 void draw() {
+  
   background(0);
   pushMatrix();
   scale(2);
@@ -118,6 +120,7 @@ void draw() {
 
   // draw detected face area(s)
   for ( int i=0; i<features.length; i++ ) {
+    loop();
     noFill();
     stroke(255, 0, 0);
     rect( features[i].x, features[i].y, features[i].width, features[i].height );
@@ -128,19 +131,7 @@ void draw() {
     //predicts the label and reads it out real time on the screen 
     float[] X = {features[i].width, rawData}; 
     double Y = getPredictionIndex(X, classifiers[0], attributes[0]);
-    if (Y >= 0.2){
-      count++;
-      if(count >10){
-        slouch = true;
-        count = 0;
-        if (slouch == true){ 
-        println("doe normaal");
-        PopupWindow window = new PopupWindow();
-        runSketch(new String[]{"PopupWindow"}, window);
-        read = false; 
-        }
-      }
-    }
+    
     /*textSize(12);
      textAlign(CENTER, CENTER);
      String text = "Prediction: "+Y+
@@ -162,6 +153,20 @@ void draw() {
 
     println(features[i].width, rawData, Y);
   }
+  if (Y >= 0.2){
+      noLoop();
+      count++;
+      if(count >10){
+        slouch = true;
+        count = 0;
+        if (slouch == true){ 
+        println("doe normaal");
+        PopupWindow window = new PopupWindow();
+        runSketch(new String[]{"PopupWindow"}, window);
+        read = false; 
+        }
+      }
+    }
   popMatrix();
 }
 
