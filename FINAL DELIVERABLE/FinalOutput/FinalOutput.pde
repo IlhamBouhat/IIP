@@ -23,6 +23,8 @@ import gab.opencv.*;
 import processing.video.*;
 import java.awt.*;
 
+
+
 ArrayList<Attribute>[] attributes = new ArrayList[2];
 Instances[] instances = new Instances[2];
 Classifier[] classifiers = new Classifier[2];
@@ -47,6 +49,7 @@ int sensorNum = 4;
 int dataIndex = 0;
 int rawData;
 int count = 0; 
+
 
 /**
  * Setup for the evaluation code set
@@ -123,6 +126,8 @@ void draw() {
       count++;
       if(count >10){
         println("doe normaal");
+        PopupWindow window = new PopupWindow();
+        runSketch(new String[]{"PopupWindow"}, window);
       }
     }
     /*textSize(12);
@@ -149,6 +154,17 @@ void draw() {
   popMatrix();
 }
 
+class PopupWindow extends PApplet {
+  public void setup(){
+    size(640,480);
+  }
+  
+  public void draw(){
+    background(255,0,0);
+    
+  }
+  
+} 
 void serialEvent(Serial port) {
   String inData = port.readStringUntil('\n');
   if (inData.charAt(0) == 'A') {
