@@ -48,6 +48,7 @@ int dataNum = 10;
 int sensorNum = 4;
 int dataIndex = 0;
 int rawData;
+int[][] accData = new int[sensorNum][dataNum];
 int count = 0; 
 
 boolean slouch = false; 
@@ -86,12 +87,12 @@ void setup() {
 
 
   instances[0] = loadTrainARFFToInstances(dataset="PostureTrainData.arff");
-  instances[1] = loadTrainARFFToInstances(dataset="AccData.arff");
+
   attributes[0] = loadAttributesFromInstances(instances[0]);
 
-  attributes[1] = loadAttributesFromInstances(instances[1]);
+
   classifiers[0] = loadModelToClassifier(model="Regressor.model"); //load a pretrained model.
-  classifiers[1] = loadModelToClassifier(model="LinearSVC.model"); //load a pretrained model.
+
 
   background(52);
   noLoop();
@@ -151,6 +152,7 @@ void draw() {
      } */
 
     if (Y >= 0.2) {
+      //loop();
       count++;
       if (count >10) {
         slouch = true;
@@ -176,15 +178,20 @@ class PopupWindow extends PApplet {
   }
 
   public void setup () {
+    instances[1] = loadTrainARFFToInstances(dataset="AccData.arff");
+    attributes[1] = loadAttributesFromInstances(instances[1]);
+    classifiers[1] = loadModelToClassifier(model="LinearSVC.model"); //load a pretrained model.
   } 
 
   public void draw() {
-    background(255, 0, 0);
-  }
-  
-  public void mousePressed(){
-    background(0, 255, 0);
-    
+    background(0, 0, 0);
+    for (int n = dataSet; n<dataIndex; n++) {
+      float[] X2 = {accData[0], accData[1], accData[2]);
+      double Y2 = getPrediction(X);
+      
+      println(X2,Y2);
+      
+    }
   }
 } 
 
@@ -196,6 +203,22 @@ void serialEvent(Serial port) {
       rawData = int(trim(inData.substring(1)));
     }
   }
+  if (dataIndex<dataNum) {
+    if (inData.charAt(0) == 'B') {
+      accData[0][dataIndex] = int(trim(inData.substring(1)));
+      println(accData[0][dataIndex]);
+    }
+    if (inData.charAt(0) == 'C') {
+      accData[1][dataIndex] = int(trim(inData.substring(1)));
+      println(accData[1][dataIndex]);
+    }
+    if (inData.charAt(0) == 'D') {
+      accData[2][dataIndex] = int(trim(inData.substring(1)));
+      println(accData[2][dataIndex]);
+      ++dataIndex;
+    }
+  }
+
   return;
 }
 
