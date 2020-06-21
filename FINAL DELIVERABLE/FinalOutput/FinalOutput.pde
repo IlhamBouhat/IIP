@@ -50,6 +50,8 @@ int dataIndex = 0;
 int rawData;
 int count = 0; 
 
+boolean slouch = false; 
+boolean read = true; 
 
 /**
  * Setup for the evaluation code set
@@ -129,9 +131,14 @@ void draw() {
     if (Y >= 0.2){
       count++;
       if(count >10){
+        slouch = true;
+        count = 0;
+        if (slouch == true){ 
         println("doe normaal");
         PopupWindow window = new PopupWindow();
         runSketch(new String[]{"PopupWindow"}, window);
+        read = false; 
+        }
       }
     }
     /*textSize(12);
@@ -162,6 +169,9 @@ class PopupWindow extends PApplet {
   public void settings() {
   size(640, 480);
 }
+
+public void setup (){
+} 
   
   public void draw(){
     background(255,0,0);
@@ -171,8 +181,10 @@ class PopupWindow extends PApplet {
 } 
 void serialEvent(Serial port) {
   String inData = port.readStringUntil('\n');
+  if(read == true){
   if (inData.charAt(0) == 'A') {
     rawData = int(trim(inData.substring(1)));
+  }
   }
   return;
 }
