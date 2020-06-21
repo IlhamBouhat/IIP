@@ -86,9 +86,9 @@ void setup() {
 
   
   instances[0] = loadTrainARFFToInstances(dataset="PostureTrainData.arff");
-  instances[1] = loadTrainARFFToInstances(dataset="AccData.arff");
+  
   attributes[0] = loadAttributesFromInstances(instances[0]);
-  attributes[1] = loadAttributesFromInstances(instances[1]);
+ 
   classifiers[0] = loadModelToClassifier(model="Regressor.model"); //load a pretrained model.
   classifiers[1] = loadModelToClassifier(model="LinearSVC.model"); //load a pretrained model.
   
@@ -103,7 +103,7 @@ void setup() {
  **/
 
 void draw() {
-  
+  loop();
   background(0);
   pushMatrix();
   scale(2);
@@ -131,7 +131,6 @@ void draw() {
     //predicts the label and reads it out real time on the screen 
     float[] X = {features[i].width, rawData}; 
     double Y = getPredictionIndex(X, classifiers[0], attributes[0]);
-    
     /*textSize(12);
      textAlign(CENTER, CENTER);
      String text = "Prediction: "+Y+
@@ -153,6 +152,8 @@ void draw() {
 
     println(features[i].width, rawData, Y);
   }
+  
+  
   if (Y >= 0.2){
       noLoop();
       count++;
@@ -176,6 +177,8 @@ class PopupWindow extends PApplet {
 }
 
 public void setup (){
+  instances[1] = loadTrainARFFToInstances(dataset="AccData.arff");
+   attributes[1] = loadAttributesFromInstances(instances[1]);
 } 
   
   public void draw(){
