@@ -45,8 +45,8 @@ ArrayList<Contour> contours;
 String featureText = "Face";
 
 int dataSet = 0;
-int dataNum = 10;
-int sensorNum = 4;
+int dataNum = 100;
+int sensorNum = 3;
 int dataIndex = 0;
 int rawData;
 int[][] accData = new int[sensorNum][dataNum];
@@ -189,7 +189,7 @@ class PopupWindow extends PApplet {
       for (int n = dataSet; n <dataIndex; n++){
       float[] X1 = {accData[0][n], accData[1][n], accData[2][n]};
       String Y1 = getPrediction(X1, classifiers[1], attributes[1], instances[1]);
-      
+      //println(accData[0][n], accData[1][n], accData[2][n]);
       println(X1,Y1);
       
     
