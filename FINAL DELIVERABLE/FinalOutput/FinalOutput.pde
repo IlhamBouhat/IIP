@@ -199,13 +199,39 @@ class PopupWindow extends PApplet {
   public void draw() {
     loop();
     background(0, 0, 0);
+    stroke(255,0,0);
+    fill(255,0,0);
+    rect(195, 210, 160, 60);
+    triangle(445,180,535,240,445,300);
+    rect(285,210,160,60);
+    triangle(195,180,105,240,195,300);
+    rect(290,145,60,160);
+    triangle(260,145,380,145,320,35); 
     for (int n = dataSet; n <dataIndex; n++) {
       float[] X1 = {accData[0][n], accData[1][n], accData[2][n]};
       String Y1 = getPrediction(X1, classifiers[1], attributes[1], instances[1]);
       println(accData[0][n], accData[1][n], accData[2][n], Y1);
       println(X1, Y1);
+     /* if(Y1 == "A"){
+        stroke(255,0,0);
+        fill(255,0,0);
+        rect(195, 210, 160, 60);
+        triangle(355,180,445,240,355,300);
+      }
+      else if(Y1 == "B"){
+        stroke(255,0,0);
+        fill(255,0,0);
+        rect(285,210,160,60);
+        triangle(285,180,195,240,285,300);
+      }
+      else if(Y1 == "C"){
+        stroke(255,0,0);
+        fill(255,0,0);
+        rect(290,205,60,160);
+        triangle(260,205,320,115,350,205);
+      } */
+    }
   }
-}
 }
 
 void serialEvent(Serial port) {
