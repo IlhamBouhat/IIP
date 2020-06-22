@@ -23,7 +23,7 @@ import processing.serial.*;
 Serial port; 
 import gab.opencv.*;
 import processing.video.*;
-//import processing.sound.*;
+import processing.sound.*;
 import java.awt.*;
 
 
@@ -57,7 +57,7 @@ int count = 0;
 
 boolean slouch = false; 
 boolean read = true; 
-//SoundFile wiiFitTrainer; 
+SoundFile wiiFitTrainer; 
 
 /**
  * Setup for the evaluation code set
@@ -71,7 +71,7 @@ void settings () {
   size(640, 480);
 } 
 void setup() {
-
+  wiiFitTrainer = new SoundFile(this, "WiiFit.wav");
 
 
   //initialises the video library and opencv library
@@ -132,7 +132,13 @@ void draw() {
     stroke(255, 0, 0);
     rect( features[i].x, features[i].y, features[i].width, features[i].height );
     noStroke();
-    fill(255);
+    noFill();
+    stroke(0,0,0);
+    rect( 0, 0, 20, 80);
+    noStroke();
+    fill(255,0,0);
+    stroke(255,0,0);
+    rect(0, (180-features[i].width), 20, 5);
     text(featureText, features[i].x, features[i].y-20);
 
     //predicts the label and reads it out real time on the screen 
@@ -186,21 +192,18 @@ class PopupWindow extends PApplet {
     instances[1] = loadTrainARFFToInstances(dataset="AccData.arff");
     attributes[1] = loadAttributesFromInstances(instances[1]);
     classifiers[1] = loadModelToClassifier(model="LinearSVC.model"); //load a pretrained model.
-    //wiiFitTrainer = new SoundFile(this, "WiiFit.wav");
-    //wiiFitTrainer.play();
+    wiiFitTrainer.play();
+    noLoop();
   } 
 
   public void draw() {
+    loop();
     background(0, 0, 0);
     for (int n = dataSet; n <dataIndex; n++) {
       float[] X1 = {accData[0][n], accData[1][n], accData[2][n]};
       String Y1 = getPrediction(X1, classifiers[1], attributes[1], instances[1]);
-      //println(accData[0][n], accData[1][n], accData[2][n]);
+      println(accData[0][n], accData[1][n], accData[2][n], Y1);
       println(X1, Y1);
-      //if(Y !='A'){
-        //noLoop();
-        //wiiFitTrainer.play();
-    //}
   }
 }
 }
