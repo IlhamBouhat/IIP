@@ -31,10 +31,10 @@ void setup() {
   size(500, 500);
   
   loadTrainARFF(dataset="accData.arff"); //load a ARFF dataset
-  trainLinearSVC(C=64);               //train a KNN classifier
+  trainLinearSVC(C=256);               //train a KNN classifier
   setModelDrawing(unit=3);
   evaluateTrainSet(fold=5, isRegression= false, showEvalDetails=true);  //5-fold cross validation
-  saveModel(model="LinearSVC.model"); //save the model
+  saveModel(model="LinearSVC-256.model"); //save the model
 }
 
 
