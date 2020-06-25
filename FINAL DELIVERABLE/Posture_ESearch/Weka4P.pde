@@ -14,11 +14,6 @@ import weka.classifiers.functions.supportVector.PolyKernel; //https://weka.sourc
 import weka.classifiers.functions.LinearRegression; //https://weka.sourceforge.io/doc.dev/weka/classifiers/functions/LinearRegression.html
 import weka.classifiers.evaluation.RegressionAnalysis; //https://weka.sourceforge.io/doc.dev/weka/classifiers/evaluation/RegressionAnalysis.html
 import weka.classifiers.functions.supportVector.RegSMOImproved; //https://weka.sourceforge.io/doc.dev/weka/classifiers/functions/supportVector/RegSMOImproved.html
-import weka.classifiers.meta.AttributeSelectedClassifier; //https://weka.sourceforge.io/doc.dev/weka/classifiers/meta/AttributeSelectedClassifier.html
-import weka.attributeSelection.InfoGainAttributeEval; //https://weka.sourceforge.io/doc.dev/weka/attributeSelection/InfoGainAttributeEval.html
-import weka.attributeSelection.CorrelationAttributeEval;
-import weka.attributeSelection.Ranker; //https://weka.sourceforge.io/doc.dev/weka/attributeSelection/Ranker.html
-import weka.classifiers.functions.MultilayerPerceptron; //https://weka.sourceforge.io/doc.dev/weka/classifiers/functions/MultilayerPerceptron.html
 
 DataSource source;
 Instances train;
@@ -30,11 +25,6 @@ Evaluation eval;
 PGraphics pg;
 Classifier cls;
 
-AttributeSelectedClassifier attrSelCls;
-CorrelationAttributeEval corrEval;
-Ranker ranker;
-InfoGainAttributeEval IGEval;
-
 
 int nClassesTrain;
 int nAttributesTrain;
@@ -44,10 +34,6 @@ double weightedFprTrain, weightedFnrTrain, weightedFTrain;
 double weightedMccTrain, weightedRocTrain, weightedPrcTrain;
 double[] precisionTrain, recallTrain, tprTrain, fprTrain, fnrTrain, fTrain, mccTrain, rocTrain, prcTrain;
 double[][] confusionMatrixTrain;
-double maeTrain = 0;
-double rmseTrain = 0;
-double raeTrain = 0;
-double rrseTrain = 0;
 
 int nClassesTest;
 int nAttributesTest;
@@ -57,15 +43,14 @@ double weightedFprTest, weightedFnrTest, weightedFTest;
 double weightedMccTest, weightedRocTest, weightedPrcTest;
 double[] precisionTest, recallTest, tprTest, fprTest, fnrTest, fTest, mccTest, rocTest, prcTest;
 double[][] confusionMatrixTest;
-double maeTest = 0;
-double rmseTest = 0;
-double raeTest = 0;
-double rrseTest = 0;
 
 double slope = 0;
 double intercept = 0;
 double corrCoef = 0;
-
+double mae = 0;
+double rmse = 0;
+double rae = 0;
+double rrse = 0;
 double ssr = 0;
 double rSquared = 0;
 
@@ -74,11 +59,7 @@ String model = "";
 double C = 64;
 double gamma = 64;
 double epsilon = 64;
-double corrThld = 0.5;
-double learningRate = 0.3;
 int K = 1;
-String hiddenLayers = "10,20,10";
-int trainingTime = 500;
 int fold = 5;
 int unit = 2;
 long timeStamp = millis();
@@ -89,7 +70,6 @@ double[][] accuracyGrid;// = new double[numOfC][numOfGamma];
 //double[][] timeLapseGrid;// = new double[numOfC][numOfGamma];
 boolean showEvalDetails = true;
 boolean isRegression = false;
-boolean drawModels = true;
 
 double[] CList;
 double[] gammaList;
@@ -102,50 +82,6 @@ color colors[] = {
   color(0, 121, 53), color(128, 128, 0), color(52, 0, 128), 
   color(128, 52, 0), color(52, 128, 0), color(128, 52, 0)
 };
-
-
-Instances loadTrainARFFToInstances(String filename) {
-  Instances insts;
-  try {
-    source = new DataSource(dataPath(filename));
-    insts = source.getDataSet();
-    insts.setClassIndex(insts.numAttributes()-1);
-    nClassesTrain = insts.numClasses();
-    nAttributesTrain = insts.numAttributes();
-    nInstancesTrain = insts.numInstances();
-    //attrs = new ArrayList<Attribute>();
-    //for (int i = 0; i < nAttributesTrain; i++) {
-    //  attrs.add(insts.attribute(i));
-    //}
-    println("===");
-    println("Data set: " + filename);
-    println("Attributes: " + insts.numAttributes());
-    println("Instances: " + insts.numInstances());
-    println("Classes: " + insts.numClasses());
-    println("Name: " + insts.classAttribute().toString());
-    return insts;
-  }
-  catch(java.lang.Exception e) {
-    println(e);
-    return null;
-  }
-}
-
-ArrayList<Attribute> loadAttributesFromInstances(Instances _insts) {
-  ArrayList<Attribute> attrs;
-  try {
-    attrs = new ArrayList<Attribute>();
-    for (int i = 0; i < nAttributesTrain; i++) {
-      attrs.add(_insts.attribute(i));
-    }
-    return attrs;
-  }
-  catch(java.lang.Exception e) {
-    println(e);
-    return null;
-  }
-}
-
 
 
 
@@ -293,80 +229,6 @@ double getPredictionIndex(float[] _features) {
   return _pred;
 }
 
-double getPredictionIndex(float[] _features, Classifier _cls, ArrayList<Attribute> _attrs) {
-  double _pred = -1;
-  try {
-    Instances test = new Instances("Test Data", _attrs, 0);
-    test.setClassIndex(_attrs.size()-1);
-    Instance instance = new DenseInstance(_attrs.size());
-    for (int i = 0; i<_features.length; i++) {
-      instance.setValue(_attrs.get(i), _features[i]);
-    }
-    instance.setDataset(test);
-    _pred = _cls.classifyInstance(instance);
-  }
-  catch (Exception ex) {
-    ex.printStackTrace();
-  }
-  return _pred;
-}
-
-double getPredictionIndex(float[] _features, Classifier _cls) {
-  double _pred = -1;
-  try {
-    Instances test = new Instances("Test Data", attributesTrain, 0);
-    test.setClassIndex(attributesTrain.size()-1);
-    Instance instance = new DenseInstance(attributesTrain.size());
-    for (int i = 0; i<_features.length; i++) {
-      instance.setValue(attributesTrain.get(i), _features[i]);
-    }
-    instance.setDataset(test);
-    _pred = _cls.classifyInstance(instance);
-  }
-  catch (Exception ex) {
-    ex.printStackTrace();
-  }
-  return _pred;
-}
-
-String getPrediction(float[] _features, Classifier _cls, ArrayList<Attribute> _attrs, Instances _insts) {
-  String label = "";
-  try {
-    Instances test = new Instances("Test Data", _attrs, 0);
-    test.setClassIndex(_attrs.size()-1);
-    Instance instance = new DenseInstance(_attrs.size());
-    for (int i = 0; i<_features.length; i++) {
-      instance.setValue(_attrs.get(i), _features[i]);
-    }
-    instance.setDataset(test);
-    int _pred = (int) _cls.classifyInstance(instance);
-    label = _insts.classAttribute().value(_pred);
-  }
-  catch (Exception ex) {
-    ex.printStackTrace();
-  }
-  return label;
-}
-
-String getPrediction(float[] _features, Classifier _cls) {
-  String label = "";
-  try {
-    Instances test = new Instances("Test Data", attributesTrain, 0);
-    test.setClassIndex(attributesTrain.size()-1);
-    Instance instance = new DenseInstance(attributesTrain.size());
-    for (int i = 0; i<_features.length; i++) {
-      instance.setValue(attributesTrain.get(i), _features[i]);
-    }
-    instance.setDataset(test);
-    int _pred = (int) _cls.classifyInstance(instance);
-    label = train.classAttribute().value(_pred);
-  }
-  catch (Exception ex) {
-    ex.printStackTrace();
-  }
-  return label;
-}
-
 String getPrediction(float[] _features) {
   String label = "";
   try {
@@ -395,86 +257,6 @@ void loadModel(String fileName) {
   }
 }
 
-Classifier loadModelToClassifier(String fileName) {
-  Classifier _cls;
-  try {
-    _cls = (Classifier) weka.core.SerializationHelper.read(dataPath(fileName));
-    return _cls;
-  } 
-  catch (Exception e) {
-    e.printStackTrace();
-    return null;
-  }
-  
-}
-
-void evaluateTestSet(Classifier _cls, Instances _insts, boolean _isRegression, boolean _showEvalDetails) {
-  showEvalDetails = _showEvalDetails;
-  try {
-    eval = new Evaluation(_insts);
-    eval.evaluateModel(_cls, _insts);
-    if (_isRegression) {
-      corrCoef = eval.correlationCoefficient();
-      maeTest = eval.meanAbsoluteError();
-      rmseTest = eval.rootMeanSquaredError();
-      raeTest = eval.relativeAbsoluteError();
-      rrseTest = eval.rootRelativeSquaredError();
-
-      if (showEvalDetails) {
-        println(_cls);
-        println(eval.toSummaryString("\nResults\n======\n", false));
-      }
-    } else if (!_isRegression) {
-      if (showEvalDetails) {
-        println(_cls);
-        System.out.println(eval.toSummaryString("\nResults\n======\n", false));
-        System.out.println(eval.toMatrixString());
-        System.out.println(eval.toClassDetailsString());
-      }
-      accuracyTest = eval.pctCorrect();
-      maeTest = eval.meanAbsoluteError();
-      rmseTest = eval.rootMeanSquaredError();
-      raeTest = eval.relativeAbsoluteError();
-      rrseTest = eval.rootRelativeSquaredError();
-      weightedPrecisionTest = eval.weightedPrecision();
-      weightedRecallTest = eval.weightedRecall();
-      weightedFprTest = eval.weightedFalsePositiveRate();
-      weightedFnrTest = eval.weightedFalseNegativeRate();
-      weightedFTest = eval.weightedFMeasure();
-      weightedMccTest = eval. weightedMatthewsCorrelation();
-      weightedRocTest = eval.weightedAreaUnderROC();
-      weightedPrcTest = eval.weightedAreaUnderPRC();
-
-      confusionMatrixTest = eval.confusionMatrix();
-
-      precisionTest = new double[nClassesTest];
-      recallTest = new double[nClassesTest];
-      tprTest = new double[nClassesTest];
-      fprTest = new double[nClassesTest];
-      fnrTest = new double[nClassesTest];
-      fTest = new double[nClassesTest];
-      rocTest = new double[nClassesTest];
-      prcTest = new double[nClassesTest];
-      mccTest = new double[nClassesTest];
-      for (int i = 0; i < nClassesTest; i++) {
-        precisionTest[i] = eval.precision(i);
-        recallTest[i] = eval.recall(i);
-        fnrTest[i] = eval.falseNegativeRate(i);
-        fprTest[i] = eval.falsePositiveRate(i);
-        tprTest[i] = eval.truePositiveRate(i);
-        fTest[i] = eval.fMeasure(i);
-        rocTest[i] = eval.areaUnderROC(i);
-        prcTest[i] = eval.areaUnderPRC(i);
-        mccTest[i] = eval.matthewsCorrelationCoefficient(i);
-      }
-    }
-  }
-  catch(java.lang.Exception e) {
-    println(e);
-  }
-}
-
-
 void evaluateTestSet(boolean _isRegression, boolean _showEvalDetails) {
   showEvalDetails = _showEvalDetails;
   try {
@@ -482,11 +264,11 @@ void evaluateTestSet(boolean _isRegression, boolean _showEvalDetails) {
     eval.evaluateModel(cls, test);
     if (_isRegression) {
       corrCoef = eval.correlationCoefficient();
-      maeTest = eval.meanAbsoluteError();
-      rmseTest = eval.rootMeanSquaredError();
-      raeTest = eval.relativeAbsoluteError();
-      rrseTest = eval.rootRelativeSquaredError();
-
+      mae = eval.meanAbsoluteError();
+      rmse = eval.rootMeanSquaredError();
+      rae = eval.relativeAbsoluteError();
+      rrse = eval.rootRelativeSquaredError();
+      
       LinearRegression lReg= new LinearRegression();
       lReg.buildClassifier(train);
       slope = lReg.coefficients()[0];
@@ -510,10 +292,6 @@ void evaluateTestSet(boolean _isRegression, boolean _showEvalDetails) {
         System.out.println(eval.toClassDetailsString());
       }
       accuracyTest = eval.pctCorrect();
-      maeTest = eval.meanAbsoluteError();
-      rmseTest = eval.rootMeanSquaredError();
-      raeTest = eval.relativeAbsoluteError();
-      rrseTest = eval.rootRelativeSquaredError();
       weightedPrecisionTest = eval.weightedPrecision();
       weightedRecallTest = eval.weightedRecall();
       weightedFprTest = eval.weightedFalsePositiveRate();
@@ -559,10 +337,10 @@ void evaluateTrainSet(int _fold, boolean _isRegression, boolean _showEvalDetails
     eval.crossValidateModel(cls, train, _fold, new Random(1)); //10-fold cross validation
     if (_isRegression) {
       corrCoef = eval.correlationCoefficient();
-      maeTrain = eval.meanAbsoluteError();
-      rmseTrain = eval.rootMeanSquaredError();
-      raeTrain = eval.relativeAbsoluteError();
-      rrseTrain = eval.rootRelativeSquaredError();
+      mae = eval.meanAbsoluteError();
+      rmse = eval.rootMeanSquaredError();
+      rae = eval.relativeAbsoluteError();
+      rrse = eval.rootRelativeSquaredError();
 
       LinearRegression lReg= new LinearRegression();
       lReg.buildClassifier(train);
@@ -587,11 +365,6 @@ void evaluateTrainSet(int _fold, boolean _isRegression, boolean _showEvalDetails
         System.out.println(eval.toClassDetailsString());
       }
       accuracyTrain = eval.pctCorrect();
-      maeTrain = eval.meanAbsoluteError();
-      rmseTrain = eval.rootMeanSquaredError();
-      raeTrain = eval.relativeAbsoluteError();
-      rrseTrain = eval.rootRelativeSquaredError();
-      
       weightedPrecisionTrain = eval.weightedPrecision();
       weightedRecallTrain = eval.weightedRecall();
       weightedFprTrain = eval.weightedFalsePositiveRate();
@@ -629,55 +402,6 @@ void evaluateTrainSet(int _fold, boolean _isRegression, boolean _showEvalDetails
     println(e);
   }
 }
-
-void rankAttrLSVC(double C) {
-  attrSelCls = new AttributeSelectedClassifier();
-  corrEval = new CorrelationAttributeEval();
-  ranker = new Ranker();
-  try {
-    cls = new SMO();
-    ((SMO)cls).setC(C);
-    attrSelCls.setClassifier(cls);
-    attrSelCls.setSearch(ranker);
-    attrSelCls.setEvaluator(corrEval);
-    attrSelCls.buildClassifier(train);
-    double[][] ra = ranker.rankedAttributes();
-    println("Rank\tIndex\tAttrName\tValue");
-    for (int i = 0; i < ra.length; i++) {
-      int index = (int)ra[i][0];
-      print(i+1);
-      print('\t');
-      print(index);
-      print('\t');
-      print(train.attribute(index).name());
-      print('\t');
-      print(ra[i][1]);
-      println();
-    }
-  }
-  catch(java.lang.Exception e) {
-    println(e);
-  }
-}
-
-void trainMLP(String _hiddenLayers, int _trainingTime, double _learningRate) {
-  try {
-    cls = new MultilayerPerceptron();
-    ((MultilayerPerceptron)cls).setGUI(false); //visualization network  
-    ((MultilayerPerceptron)cls).setHiddenLayers(_hiddenLayers); //network structure
-    ((MultilayerPerceptron)cls).setTrainingTime(_trainingTime); //network structure
-    ((MultilayerPerceptron)cls).setLearningRate(_learningRate);
-    ((MultilayerPerceptron)cls).setSeed(millis());
-    timeStamp = millis();
-    println("\n=== Training: Multi-layer Perceptron [", _hiddenLayers, "], training time =", _trainingTime);
-    cls.buildClassifier(train);
-    timeLapse = millis()-timeStamp;
-  }
-  catch(java.lang.Exception e) {
-    println(e);
-  }
-}
-
 
 void trainLinearRegression() {
   try {
@@ -941,37 +665,6 @@ void drawPrediction(float[] X, double Y) {
   popStyle();
 }
 
-void drawPrediction(float[] X, double Y, color c) {
-  pushStyle();
-  textSize(12);
-  textAlign(LEFT, CENTER);
-  noStroke();
-  fill(255);
-  ellipse(X[0], X[1], 15, 15);
-
-  noStroke();
-  fill(c);
-  ellipse(X[0], X[1], 10, 10);
-  fill(0);
-  String label = "X = ["+X[0]+","+X[1]+"]\nY = "+nf((float)Y, 0, 3);
-  text(label, X[0]+10, X[1]);
-  popStyle();
-}
-
-void drawPrediction(float[] X, String Y, color c) {
-  pushStyle();
-  textSize(12);
-  textAlign(LEFT, CENTER);
-  noStroke();
-  fill(255);
-  ellipse(X[0], X[1], 15, 15);
-  fill(c);
-  ellipse(X[0], X[1], 10, 10);
-  String label = "X = ["+X[0]+","+X[1]+"]\nY = "+Y;
-  text(label, X[0]+10, X[1]);
-  popStyle();
-}
-
 void drawPrediction(float[] X, String Y) {
   pushStyle();
   textSize(12);
@@ -1125,7 +818,7 @@ void EpsSearchLSVR(double[] _EpsList) {
     evaluateTrainSet(fold=5, isRegression=true, showEvalDetails=false);        //5-fold cross validation
     setModelDrawing(unit=ceil(sqrt(_EpsList.length))*2);         //set the model visualization (for 2D features)
     modelImageGrid[c][0] = pg.get();
-    accuracyGrid[c][0] = rmseTrain;
+    accuracyGrid[c][0] = rmse;
     println(fold+"-fold CV Accuracy:", nf((float)accuracyTrain, 0, 2), "%\n");
   }
 }
@@ -1211,7 +904,7 @@ void gridSearchSVR_RBF(double[] _EpsList, double[] _gammaList) {
       evaluateTrainSet(fold=5, isRegression=true, showEvalDetails=false);        //5-fold cross validation
       setModelDrawing(unit=_gammaList.length*2);         //set the model visualization (for 2D features)
       modelImageGrid[c][g] = pg.get();
-      accuracyGrid[c][g] = rmseTrain;
+      accuracyGrid[c][g] = rmse;
       println(fold+"-fold CV Accuracy:", nf((float)accuracyTrain, 0, 2), "%\n");
     }
   }
