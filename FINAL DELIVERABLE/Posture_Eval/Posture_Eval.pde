@@ -63,9 +63,9 @@ void setup() {
   opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);  
   video.start();
 
-  loadTrainARFF(dataset="PostureTrainData.arff"); //load a ARFF dataset
-  loadTestARFF(dataset = "PostureTestData.arff");
-  loadModel(model="Regressor.model"); //load a pretrained model.
+  loadTrainARFF(dataset="PostureTrain-P1-P2-Data.arff"); //load a ARFF dataset
+  loadTestARFF(dataset = "PostureTest-P3-Data.arff");
+  loadModel(model="P1-P2-Regressor.model"); //load a pretrained model.
   evaluateTestSet(isRegression = true, showEvalDetails=true); 
 
   //initialises the Serial communication. Each time Arduino sends a value, that value is loaded in a list

@@ -68,7 +68,7 @@ void setup() {
 
   loadTrainARFF(dataset="USTrainData.arff"); //load a ARFF dataset
   println(train);
-  trainLinearSVR(epsilon=0.125);               //train a KNN classifier
+  trainLinearSVR(epsilon=0.0625);               //train a KNN classifier
   evaluateTrainSet(fold=5, isRegression = true, showEvalDetails=true);  //5-fold cross validation
   saveModel(model="UltraRegressor.model"); //save the model
 

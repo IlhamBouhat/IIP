@@ -66,11 +66,11 @@ void setup() {
   opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);  
   video.start();
 
-  loadTrainARFF(dataset="PostureTrainData.arff"); //load a ARFF dataset
+  loadTrainARFF(dataset="PostureTrain-P1-P2-Data.arff"); //load a ARFF dataset
   println(train);
-  trainLinearSVR(epsilon=0.125);               //train a KNN classifier
+  trainLinearSVR(epsilon=0.250);               //train a KNN classifier
   evaluateTrainSet(fold=5, isRegression = true, showEvalDetails=true);  //5-fold cross validation
-  saveModel(model="Regressor.model"); //save the model
+  saveModel(model="P1-P2-Regressor.model"); //save the model
 
   background(52);
 }
