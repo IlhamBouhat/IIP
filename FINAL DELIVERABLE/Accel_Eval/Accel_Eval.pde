@@ -1,21 +1,4 @@
-/**
- * Posture evaluation code
- * @author Ilham El Bouhattaoui, Luuk Stavenuiter, Nadine Schellekens
- * @id 1225930, 
- * date: 31/05/2020
- * 
- * The baseline for this code is the same as the Posture_Trainer code
- * One change is that it loads the model made in the Trainer code, and the data set, and will then do a live prediction under which label each scenario falls
- 
- * Uses example codes from the github library for the course DBB220 Interactive Intelligent Products topic 2.2, 3.1 and 8.2
- 
- * Links to the source code: 
- * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/2_2_Serial_Communication/Processing/p2_2c_SaveSerialAsARFF_A012
- * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/3_1_Linear_Support_Vector_Classification/Processing/p3_1b_loadLSVC
- * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/HAARCascade
- * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/SaveARFF_FaceRecognition
- * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/TrainLSVC_FaceRecognition
- **/
+
 
 import processing.serial.*;
 Serial port; 

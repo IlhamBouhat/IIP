@@ -1,23 +1,11 @@
 
 
 /**
- * Posture evaluation code
+ * The Final Output code for our prototype
  * @author Ilham El Bouhattaoui, Luuk Stavenuiter, Nadine Schellekens
  * @id 1225930, 
- * date: 31/05/2020
- * 
- * The baseline for this code is the same as the Posture_Trainer code
- * One change is that it loads the model made in the Trainer code, and the data set, and will then do a live prediction under which label each scenario falls
- 
- * Uses example codes from the github library for the course DBB220 Interactive Intelligent Products topic 2.2, 3.1 and 8.2
- 
- * Links to the source code: 
- * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/2_2_Serial_Communication/Processing/p2_2c_SaveSerialAsARFF_A012
- * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/3_1_Linear_Support_Vector_Classification/Processing/p3_1b_loadLSVC
- * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/HAARCascade
- * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/SaveARFF_FaceRecognition
- * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/TrainLSVC_FaceRecognition
- **/
+ */
+
 
 import processing.serial.*;
 Serial port; 
@@ -59,13 +47,7 @@ boolean slouch = false;
 boolean read = true; 
 SoundFile wiiFitTrainer; 
 
-/**
- * Setup for the evaluation code set
- * Defines libraries used, and which features are selected
- * Initialises serial communication
- * Loads the training set and the model
- * Evaluates the training set 
- **/
+
 
 void settings () {
   size(640, 480);
@@ -133,11 +115,11 @@ void draw() {
     rect( features[i].x, features[i].y, features[i].width, features[i].height );
     noStroke();
     noFill();
-    stroke(0,0,0);
+    stroke(0, 0, 0);
     rect( 0, 0, 20, 80);
     noStroke();
-    fill(255,0,0);
-    stroke(255,0,0);
+    fill(255, 0, 0);
+    stroke(255, 0, 0);
     rect(0, (180-features[i].width), 20, 5);
     text(featureText, features[i].x, features[i].y-20);
 
@@ -199,37 +181,37 @@ class PopupWindow extends PApplet {
   public void draw() {
     loop();
     background(0, 0, 0);
-    stroke(255,0,0);
-    fill(255,0,0);
+    stroke(255, 0, 0);
+    fill(255, 0, 0);
     rect(195, 210, 160, 60);
-    triangle(445,180,535,240,445,300);
-    rect(285,210,160,60);
-    triangle(195,180,105,240,195,300);
-    rect(290,145,60,160);
-    triangle(260,145,380,145,320,35); 
+    triangle(445, 180, 535, 240, 445, 300);
+    rect(285, 210, 160, 60);
+    triangle(195, 180, 105, 240, 195, 300);
+    rect(290, 145, 60, 160);
+    triangle(260, 145, 380, 145, 320, 35); 
     for (int n = dataSet; n <dataIndex; n++) {
       float[] X1 = {accData[0][n], accData[1][n], accData[2][n]};
       String Y1 = getPrediction(X1, classifiers[1], attributes[1], instances[1]);
       println(accData[0][n], accData[1][n], accData[2][n], Y1);
       println(X1, Y1);
-     /* if(Y1 == "A"){
-        stroke(255,0,0);
-        fill(255,0,0);
-        rect(195, 210, 160, 60);
-        triangle(355,180,445,240,355,300);
-      }
-      else if(Y1 == "B"){
-        stroke(255,0,0);
-        fill(255,0,0);
-        rect(285,210,160,60);
-        triangle(285,180,195,240,285,300);
-      }
-      else if(Y1 == "C"){
-        stroke(255,0,0);
-        fill(255,0,0);
-        rect(290,205,60,160);
-        triangle(260,205,320,115,350,205);
-      } */
+      /* if(Y1 == "A"){
+       stroke(255,0,0);
+       fill(255,0,0);
+       rect(195, 210, 160, 60);
+       triangle(355,180,445,240,355,300);
+       }
+       else if(Y1 == "B"){
+       stroke(255,0,0);
+       fill(255,0,0);
+       rect(285,210,160,60);
+       triangle(285,180,195,240,285,300);
+       }
+       else if(Y1 == "C"){
+       stroke(255,0,0);
+       fill(255,0,0);
+       rect(290,205,60,160);
+       triangle(260,205,320,115,350,205);
+       } */
     }
   }
 }

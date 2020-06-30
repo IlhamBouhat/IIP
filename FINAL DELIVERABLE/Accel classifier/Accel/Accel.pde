@@ -1,16 +1,4 @@
-/**
- * Posture determining code
- * @author Ilham El Bouhattaoui, Luuk Stavenuiter, Nadine Schellekens
- * @id 1225930, 
- * date: 31/05/2020
- * 
- * This code uses the opencv library and the processing video library to determine the distance between the face and the webcam and 
- * saves it to a parameter, {@ code A} being good posture and {@code B} being bad posture
- *
- * Uses example codes from the github library for the course DBB220 Interactive Intelligent Products
- * Links to the source code: 
- * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/2_2_Serial_Communication/Processing/p2_2c_SaveSerialAsARFF_A012
- * https://github.com/howieliang/IIP1920/tree/master/Example%20Codes/8_2_Camera_Based_Activity_Recognition/t3_FaceDetection/HAARCascade
+
  *
  *
  *
@@ -62,15 +50,7 @@ void setup() {
 }
 
 
-/**
- * draw method 
- * In this method, the opencv library is initialised
- * Furthermore, it is calibrated to detect the face and draw a bounding box around it
- * The bounding box is determined with the x, y, width and height of the face to the webcam
- * It also saves the width variable to determine the distance. The larger the bounding box, the closer 
- * the user is to the webcam and vice versa
- * These variables are then saved to a parameter {@ code A} or {@ code B}, being good and bad posture
- **/
+
 void draw() {
   background(255);
   float pointSize = height/dataNum;
